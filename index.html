@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bingo vs Bot (ไฟล์เดียว)</title>
+  <title>XO vs Bot (ไฟล์เดียว)</title>
   <style>
     :root{
       --bg1:#0b1020; --bg2:#0a2a4a;
@@ -11,7 +11,7 @@
       --stroke: rgba(255,255,255,.16);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.72);
-      --good:#6ee7ff; --warn:#ffd56a; --bad:#ff6b8b; --ok:#a6ff9a;
+      --good:#a6ff9a; --warn:#ffd56a; --bad:#ff6b8b; --info:#6ee7ff;
       --shadow: 0 18px 50px rgba(0,0,0,.35);
     }
     *{ box-sizing:border-box; }
@@ -26,7 +26,7 @@
       overflow-x:hidden;
     }
     .wrap{
-      width:min(1100px, 94vw);
+      width:min(980px, 94vw);
       display:grid;
       gap:14px;
     }
@@ -49,10 +49,9 @@
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.06);
       font-size:13px; color:var(--muted);
+      font-weight:800;
     }
-    .dot{width:10px;height:10px;border-radius:999px;background:var(--good); box-shadow:0 0 14px rgba(110,231,255,.45)}
-    .dot.ok{background:var(--ok); box-shadow:0 0 14px rgba(166,255,154,.35)}
-    .dot.warn{background:var(--warn); box-shadow:0 0 14px rgba(255,213,106,.38)}
+    .dot{width:10px;height:10px;border-radius:999px;background:var(--info); box-shadow:0 0 14px rgba(110,231,255,.45)}
     .actions{
       display:flex; gap:10px; align-items:center; flex-wrap:wrap;
     }
@@ -63,24 +62,23 @@
       color:var(--text);
       padding:10px 12px;
       border-radius:14px;
-      font-weight:700;
+      font-weight:900;
       cursor:pointer;
       transition: transform .12s ease, background .12s ease, border-color .12s ease;
     }
-    select{ font-weight:700; }
+    select{ font-weight:900; }
     button:hover, select:hover{ transform: translateY(-1px); background:rgba(255,255,255,.11); border-color:rgba(255,255,255,.26)}
     button:active{ transform: translateY(0px) scale(.99)}
     button:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
 
     .grid{
       display:grid;
-      grid-template-columns: 1.15fr .85fr;
+      grid-template-columns: 1fr .9fr;
       gap:14px;
     }
-    @media (max-width: 980px){
+    @media (max-width: 920px){
       .grid{ grid-template-columns: 1fr; }
     }
-
     .panel{
       border:1px solid var(--stroke);
       background:var(--card);
@@ -90,104 +88,24 @@
       padding:14px;
     }
 
-    .boards{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:14px;
+    .statusRow{
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      flex-wrap:wrap;
+      margin-bottom:12px;
     }
-    @media (max-width: 820px){
-      .boards{ grid-template-columns: 1fr; }
-    }
-
-    .boardHeader{
-      display:flex; align-items:center; justify-content:space-between;
-      margin-bottom:10px;
-      gap:10px;
-    }
-    .name{
-      display:flex; align-items:center; gap:10px;
-      font-size:16px;
-      font-weight:900;
-      letter-spacing:.02em;
-    }
-    .small{
-      font-size:12px; color:var(--muted); font-weight:700;
-    }
-
-    .bingoCard{
-      width:100%;
-      display:grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap:10px;
-      padding:12px;
+    .status{
+      padding:12px 14px;
       border-radius:16px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.12);
-      position:relative;
-      overflow:hidden;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      flex:1;
+      min-width: 240px;
     }
-
-    .cell{
-      position:relative;
-      aspect-ratio: 1 / 1;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.06);
-      display:grid;
-      place-items:center;
-      font-weight:900;
-      font-size: clamp(16px, 2.2vw, 22px);
-      user-select:none;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
-    }
-    .cell.free{
-      background: rgba(110,231,255,.10);
-      border-color: rgba(110,231,255,.25);
-    }
-    .cell.marked{
-      background: rgba(166,255,154,.12);
-      border-color: rgba(166,255,154,.28);
-      box-shadow: 0 0 0 1px rgba(166,255,154,.12) inset;
-    }
-    .cell.marked::after{
-      content:"✓";
-      position:absolute;
-      top:6px; right:8px;
-      font-size:14px;
-      opacity:.85;
-    }
-    .cell.hit{
-      animation: pop .18s ease-out both;
-      border-color: rgba(255,213,106,.35);
-      background: rgba(255,213,106,.10);
-    }
-    @keyframes pop{
-      from{ transform: scale(.96); }
-      to{ transform: scale(1); }
-    }
-
-    .statusRow{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-      margin-bottom:10px;
-    }
-    .bigCall{
-      flex: 1;
-      min-width: 220px;
-      padding:12px 14px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.12);
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px;
-    }
-    .bigCall .label{ color:var(--muted); font-weight:800; font-size:12px; }
-    .bigCall .num{
-      font-size:28px;
-      font-weight:1000;
-      letter-spacing:.02em;
-    }
-    .meter{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    .status .label{ color:var(--muted); font-weight:900; font-size:12px; }
+    .status .value{ font-weight:1000; font-size:16px; }
+    .pillRow{
+      display:flex; gap:10px; flex-wrap:wrap;
     }
     .pill{
       display:inline-flex; gap:8px; align-items:center;
@@ -195,54 +113,55 @@
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.06);
       font-size:13px; color:var(--muted);
-      font-weight:800;
+      font-weight:900;
     }
     .pill b{ color:var(--text); }
 
-    .calledBox{
+    .board{
+      width:100%;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
       padding:12px;
-      border-radius:16px;
+      border-radius:18px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.12);
+      position:relative;
+      user-select:none;
+      -webkit-user-select:none;
     }
-    .calledHeader{
-      display:flex; justify-content:space-between; align-items:center; gap:10px;
-      margin-bottom:8px;
-    }
-    .calledList{
-      display:flex; flex-wrap:wrap; gap:8px;
-      max-height: 180px;
-      overflow:auto;
-      padding-right:4px;
-    }
-    .tag{
-      padding:6px 10px;
-      border-radius:999px;
+    .cell{
+      aspect-ratio: 1 / 1;
+      border-radius:18px;
       border:1px solid rgba(255,255,255,.16);
       background: rgba(255,255,255,.06);
-      font-weight:900;
-      font-size:12px;
-      color: rgba(255,255,255,.86);
+      display:grid;
+      place-items:center;
+      font-weight:1100;
+      font-size: clamp(36px, 6vw, 64px);
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      position:relative;
+      overflow:hidden;
     }
-    .tag.last{
-      border-color: rgba(255,213,106,.35);
-      background: rgba(255,213,106,.10);
+    .cell:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.25); }
+    .cell:active{ transform: translateY(0px) scale(.99); }
+    .cell.disabled{ cursor:not-allowed; opacity:.85; }
+    .cell.win{
+      border-color: rgba(166,255,154,.35);
+      background: rgba(166,255,154,.14);
+      box-shadow: 0 0 0 1px rgba(166,255,154,.10) inset;
     }
 
-    .result{
-      margin-top:12px;
-      padding:12px 14px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.12);
-      font-weight:900;
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-    }
-    .result .msg{ font-size:14px; color:var(--muted); font-weight:800; }
-    .result .win{ color: var(--ok); }
-    .result .lose{ color: var(--bad); }
-    .result .draw{ color: var(--warn); }
+    .markX{ color: rgba(110,231,255,.95); text-shadow: 0 0 14px rgba(110,231,255,.25); }
+    .markO{ color: rgba(255,213,106,.95); text-shadow: 0 0 14px rgba(255,213,106,.22); }
 
+    .sideTitle{
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:10px;
+      gap:10px;
+    }
+    .sideTitle h3{ margin:0; font-size:16px; font-weight:1100; letter-spacing:.02em; }
     .hint{
       margin: 8px 2px 0;
       font-size: 13px;
@@ -254,476 +173,341 @@
       border:1px solid rgba(255,255,255,.18);
       background: rgba(0,0,0,.18);
       color: rgba(255,255,255,.92);
-      font-weight:900;
+      font-weight:1000;
       font-size:12px;
     }
+    .scoreBig{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:10px;
+    }
+    .scoreBox{
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.12);
+    }
+    .scoreBox .t{ color:var(--muted); font-weight:1000; font-size:12px; margin-bottom:6px; }
+    .scoreBox .n{ font-weight:1200; font-size:22px; }
+    .tagWin{ color: var(--good); font-weight:1200; }
+    .tagLose{ color: var(--bad); font-weight:1200; }
+    .tagDraw{ color: var(--warn); font-weight:1200; }
   </style>
 </head>
 <body>
   <div class="wrap">
-
     <div class="topbar">
       <div class="title">
-        <div style="font-weight:1000; font-size:18px;">Bingo vs Bot</div>
-        <span class="badge"><span class="dot"></span> 5x5 • FREE ตรงกลาง</span>
-        <span class="badge"><span class="dot ok"></span> ชนะเมื่อได้ 1 เส้น</span>
+        <div style="font-weight:1200; font-size:18px;">XO vs Bot</div>
+        <span class="badge"><span class="dot"></span> เล่นเป็น X • บอทเป็น O</span>
+        <span class="badge">Hard = บอทแทบไม่แพ้</span>
       </div>
-
       <div class="actions">
-        <select id="mode" title="โหมดสุ่มเลข">
-          <option value="manual">กดสุ่มเอง (Manual)</option>
-          <option value="auto">สุ่มอัตโนมัติ (Auto)</option>
+        <select id="difficulty" title="ความยาก">
+          <option value="easy">Easy</option>
+          <option value="normal" selected>Normal</option>
+          <option value="hard">Hard (Minimax)</option>
         </select>
-        <select id="speed" title="ความเร็ว Auto">
-          <option value="1200">Auto: 1.2s</option>
-          <option value="900">Auto: 0.9s</option>
-          <option value="650">Auto: 0.65s</option>
-        </select>
-        <button id="drawBtn">สุ่มเลข</button>
-        <button id="pauseBtn" aria-pressed="false">พัก</button>
-        <button id="resetBtn">เริ่มใหม่</button>
+        <button id="newBtn">ตาใหม่</button>
+        <button id="resetBtn">รีเซ็ตสกอร์</button>
       </div>
     </div>
 
     <div class="grid">
-
       <div class="panel">
         <div class="statusRow">
-          <div class="bigCall">
+          <div class="status">
             <div>
-              <div class="label">เลขล่าสุด</div>
-              <div class="num" id="lastNum">—</div>
+              <div class="label">สถานะเกม</div>
+              <div class="value" id="statusText">ตาคุณ (X)</div>
             </div>
-            <div class="meter">
-              <span class="pill"><span class="dot warn"></span>เรียกไปแล้ว: <b id="calledCount">0</b>/75</span>
-              <span class="pill"><span class="dot"></span>เส้นคุณ: <b id="pLines">0</b></span>
-              <span class="pill"><span class="dot bad"></span>เส้นบอท: <b id="bLines">0</b></span>
+            <div class="pillRow">
+              <span class="pill">X: <b>คุณ</b></span>
+              <span class="pill">O: <b>บอท</b></span>
             </div>
           </div>
         </div>
 
-        <div class="boards">
-          <div>
-            <div class="boardHeader">
-              <div class="name"><span class="dot ok"></span> คุณ <span class="small">(ระบบติ๊กให้อัตโนมัติ)</span></div>
-              <div class="small">เลขบนการ์ด: 1–75</div>
-            </div>
-            <div class="bingoCard" id="playerCard" aria-label="การ์ดของคุณ"></div>
-          </div>
-
-          <div>
-            <div class="boardHeader">
-              <div class="name"><span class="dot bad"></span> บอท <span class="small">(ติ๊กให้อัตโนมัติ)</span></div>
-              <div class="small">โชคเหมือนกัน แต่การ์ดคนละใบ</div>
-            </div>
-            <div class="bingoCard" id="botCard" aria-label="การ์ดของบอท"></div>
-          </div>
-        </div>
-
-        <div class="result" id="resultBox">
-          <div>
-            <div style="font-weight:1000;">สถานะ: <span id="stateText">พร้อมเล่น</span></div>
-            <div class="msg" id="stateHint">กด “สุ่มเลข” เพื่อเริ่ม หรือเลือก Auto</div>
-          </div>
-          <div id="winnerTag" style="font-weight:1000;"></div>
+        <div class="board" id="board" aria-label="กระดาน XO">
+          <!-- cells inserted by JS -->
         </div>
 
         <p class="hint">
-          • ชนะเมื่อได้ครบ <b>1 เส้น</b> (แถว/คอลัมน์/ทแยง) <br>
-          • ช่องกลางเป็น <span class="kbd">FREE</span> ติ๊กให้แล้ว <br>
-          • โหมด Auto จะเรียกเลขเองตามความเร็วที่เลือก
+          วิธีเล่น: คลิกช่องเพื่อวาง <span class="kbd">X</span> แล้วบอทจะวาง <span class="kbd">O</span> อัตโนมัติ <br>
+          ทิป: โหมด <b>Hard</b> จะใช้ Minimax (ยากสุด)
         </p>
       </div>
 
       <div class="panel">
-        <div class="calledBox">
-          <div class="calledHeader">
-            <div style="font-weight:1000;">เลขที่ถูกเรียก</div>
-            <div class="small">ล่าสุดอยู่ซ้ายสุด</div>
+        <div class="sideTitle">
+          <h3>สกอร์</h3>
+          <div class="hint" style="margin:0;">ชนะ/แพ้/เสมอ</div>
+        </div>
+
+        <div class="scoreBig">
+          <div class="scoreBox">
+            <div class="t">คุณ (X)</div>
+            <div class="n" id="sx">0</div>
           </div>
-          <div class="calledList" id="calledList"></div>
+          <div class="scoreBox">
+            <div class="t">เสมอ</div>
+            <div class="n" id="sd">0</div>
+          </div>
+          <div class="scoreBox">
+            <div class="t">บอท (O)</div>
+            <div class="n" id="so">0</div>
+          </div>
+        </div>
+
+        <div class="scoreBox" style="margin-top:10px;">
+          <div class="t">ผลล่าสุด</div>
+          <div class="n" id="lastResult" style="font-size:16px;">—</div>
         </div>
 
         <p class="hint">
-          ทิปสำหรับ “แข่ง”: ตั้งโหมด Auto แล้วปล่อยให้เกมตัดสินเองว่าใคร Bingo ก่อน 🎯
+          ปุ่มลัด: <span class="kbd">N</span> ตาใหม่ • <span class="kbd">R</span> รีเซ็ตสกอร์
         </p>
       </div>
-
     </div>
   </div>
 
   <script>
-    // ======= Bingo vs Bot (single file) =======
-    const SIZE = 5;
-    const MAX_NUM = 75;
-
-    const elPlayer = document.getElementById("playerCard");
-    const elBot = document.getElementById("botCard");
-    const elLastNum = document.getElementById("lastNum");
-    const elCalledCount = document.getElementById("calledCount");
-    const elCalledList = document.getElementById("calledList");
-    const elPLines = document.getElementById("pLines");
-    const elBLines = document.getElementById("bLines");
-    const elStateText = document.getElementById("stateText");
-    const elStateHint = document.getElementById("stateHint");
-    const elWinnerTag = document.getElementById("winnerTag");
-
-    const drawBtn = document.getElementById("drawBtn");
+    // ===== XO vs Bot (single-file) =====
+    const boardEl = document.getElementById("board");
+    const statusText = document.getElementById("statusText");
+    const difficultyEl = document.getElementById("difficulty");
+    const newBtn = document.getElementById("newBtn");
     const resetBtn = document.getElementById("resetBtn");
-    const pauseBtn = document.getElementById("pauseBtn");
-    const modeSel = document.getElementById("mode");
-    const speedSel = document.getElementById("speed");
 
-    const state = {
-      called: [],
-      calledSet: new Set(),
-      deck: [],
-      running: false,
-      paused: false,
-      ended: false,
-      autoTimer: null,
-      lastMarkedCells: [] // for visual hit flash
+    const sx = document.getElementById("sx");
+    const so = document.getElementById("so");
+    const sd = document.getElementById("sd");
+    const lastResult = document.getElementById("lastResult");
+
+    const SCORE_KEY = "xo_vs_bot_score_v1";
+    const loadScore = () => {
+      try{
+        const v = JSON.parse(localStorage.getItem(SCORE_KEY) || "null");
+        if(!v) return {x:0,o:0,d:0};
+        return {x:+v.x||0, o:+v.o||0, d:+v.d||0};
+      }catch{ return {x:0,o:0,d:0}; }
     };
+    const saveScore = (s) => localStorage.setItem(SCORE_KEY, JSON.stringify(s));
 
-    function shuffle(arr){
-      for(let i=arr.length-1;i>0;i--){
-        const j = (Math.random()*(i+1))|0;
-        [arr[i], arr[j]] = [arr[j], arr[i]];
+    let score = loadScore();
+    function syncScore(){
+      sx.textContent = score.x;
+      so.textContent = score.o;
+      sd.textContent = score.d;
+    }
+    syncScore();
+
+    let board = Array(9).fill(null); // "X" | "O" | null
+    let turn = "X"; // player starts
+    let locked = false;
+    let gameOver = false;
+
+    const wins = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+
+    function getWinner(b){
+      for(const line of wins){
+        const [a,c,d] = line;
+        if(b[a] && b[a] === b[c] && b[a] === b[d]) return {winner:b[a], line};
       }
-      return arr;
+      if(b.every(x => x)) return {winner:"D", line:[]}; // draw
+      return null;
     }
 
-    function makeDeck(){
-      const d = [];
-      for(let i=1;i<=MAX_NUM;i++) d.push(i);
-      return shuffle(d);
+    function setStatus(msg){
+      statusText.textContent = msg;
     }
 
-    function makeCard(){
-      // pick 24 unique numbers from 1..75; center is FREE
-      const pool = makeDeck().slice(0, 24);
-      const grid = [];
-      let k = 0;
-      for(let r=0;r<SIZE;r++){
-        const row = [];
-        for(let c=0;c<SIZE;c++){
-          if(r===2 && c===2){
-            row.push({ value: "FREE", marked: true, free: true });
-          }else{
-            row.push({ value: pool[k++], marked: false, free: false });
-          }
+    function render(){
+      boardEl.innerHTML = "";
+      const w = getWinner(board);
+      for(let i=0;i<9;i++){
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        if(gameOver || locked || board[i]) cell.classList.add("disabled");
+
+        const v = board[i];
+        if(v === "X"){
+          cell.innerHTML = `<span class="markX">X</span>`;
+        }else if(v === "O"){
+          cell.innerHTML = `<span class="markO">O</span>`;
+        }else{
+          cell.innerHTML = "";
         }
-        grid.push(row);
-      }
-      return grid;
-    }
 
-    function renderCard(el, card, who){
-      el.innerHTML = "";
-      for(let r=0;r<SIZE;r++){
-        for(let c=0;c<SIZE;c++){
-          const cell = document.createElement("div");
-          cell.className = "cell" + (card[r][c].free ? " free marked" : "");
-          cell.dataset.r = r;
-          cell.dataset.c = c;
-          cell.dataset.who = who;
-          cell.textContent = card[r][c].value;
-          el.appendChild(cell);
+        if(w && w.line.includes(i)){
+          cell.classList.add("win");
         }
+
+        cell.addEventListener("click", () => onPlayerMove(i));
+        boardEl.appendChild(cell);
       }
     }
 
-    function markIfPresent(card, el, number){
-      // mark matching number; return list of touched DOM cells for animation
-      const hits = [];
-      for(let r=0;r<SIZE;r++){
-        for(let c=0;c<SIZE;c++){
-          const cell = card[r][c];
-          if(!cell.free && cell.value === number && !cell.marked){
-            cell.marked = true;
-            const dom = el.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
-            if(dom){
-              dom.classList.add("marked","hit");
-              hits.push(dom);
-            }
-          }
-        }
-      }
-      // update marked styles for already marked cells (in case of rerender needs)
-      // (we do minimal work; only new hit cells get "hit")
-      return hits;
-    }
+    function finish(result){
+      gameOver = true;
+      locked = false;
 
-    function syncMarkedStyles(card, el){
-      for(let r=0;r<SIZE;r++){
-        for(let c=0;c<SIZE;c++){
-          const dom = el.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
-          if(!dom) continue;
-          dom.classList.toggle("marked", !!card[r][c].marked);
-          dom.classList.toggle("free", !!card[r][c].free);
-        }
-      }
-    }
-
-    function countLines(card){
-      let lines = 0;
-
-      // rows
-      for(let r=0;r<SIZE;r++){
-        let ok = true;
-        for(let c=0;c<SIZE;c++) if(!card[r][c].marked) { ok=false; break; }
-        if(ok) lines++;
-      }
-      // cols
-      for(let c=0;c<SIZE;c++){
-        let ok = true;
-        for(let r=0;r<SIZE;r++) if(!card[r][c].marked) { ok=false; break; }
-        if(ok) lines++;
-      }
-      // diag \
-      {
-        let ok = true;
-        for(let i=0;i<SIZE;i++) if(!card[i][i].marked) { ok=false; break; }
-        if(ok) lines++;
-      }
-      // diag /
-      {
-        let ok = true;
-        for(let i=0;i<SIZE;i++) if(!card[i][SIZE-1-i].marked) { ok=false; break; }
-        if(ok) lines++;
-      }
-
-      return lines;
-    }
-
-    function setStatus(text, hint, tagText, tagClass){
-      elStateText.textContent = text;
-      elStateHint.textContent = hint || "";
-      elWinnerTag.textContent = tagText || "";
-      elWinnerTag.className = tagClass || "";
-    }
-
-    let playerCard, botCard;
-
-    function clearHitEffects(){
-      // remove "hit" class after short time
-      state.lastMarkedCells.forEach(dom => dom.classList.remove("hit"));
-      state.lastMarkedCells = [];
-    }
-
-    function pushCalled(number){
-      state.called.unshift(number);
-      state.calledSet.add(number);
-      elCalledCount.textContent = String(state.called.length);
-
-      const tag = document.createElement("span");
-      tag.className = "tag last";
-      tag.textContent = number;
-      elCalledList.prepend(tag);
-
-      // demote previous "last"
-      const tags = elCalledList.querySelectorAll(".tag");
-      tags.forEach((t, idx) => {
-        if(idx === 0) t.classList.add("last");
-        else t.classList.remove("last");
-      });
-
-      // keep list manageable in DOM (still keep state.called full)
-      if(elCalledList.childElementCount > 80){
-        elCalledList.removeChild(elCalledList.lastElementChild);
-      }
-    }
-
-    function endGame(result){
-      state.ended = true;
-      state.running = false;
-      stopAuto();
-
-      drawBtn.disabled = true;
-      pauseBtn.disabled = true;
-
-      if(result === "player"){
-        setStatus("จบเกม", "คุณได้ Bingo ก่อน!", "WIN", "win");
-      }else if(result === "bot"){
-        setStatus("จบเกม", "บอทได้ Bingo ก่อน!", "LOSE", "lose");
+      if(result === "X"){
+        score.x += 1; saveScore(score); syncScore();
+        setStatus("คุณชนะ! (X)");
+        lastResult.innerHTML = `<span class="tagWin">WIN</span> คุณชนะ`;
+      }else if(result === "O"){
+        score.o += 1; saveScore(score); syncScore();
+        setStatus("บอทชนะ! (O)");
+        lastResult.innerHTML = `<span class="tagLose">LOSE</span> บอทชนะ`;
       }else{
-        setStatus("จบเกม", "ได้ Bingo พร้อมกัน!", "DRAW", "draw");
+        score.d += 1; saveScore(score); syncScore();
+        setStatus("เสมอ!");
+        lastResult.innerHTML = `<span class="tagDraw">DRAW</span> เสมอ`;
       }
+      render();
     }
 
-    function drawNumber(){
-      if(state.ended) return;
-      if(state.paused) return;
-
-      if(!state.running){
-        state.running = true;
-        pauseBtn.disabled = false;
-        drawBtn.disabled = false;
-        setStatus("กำลังเล่น", "สุ่มเลขไปเรื่อย ๆ จนกว่าจะมีผู้ชนะ", "");
-      }
-
-      if(state.deck.length === 0){
-        // no more numbers, decide by lines
-        const p = countLines(playerCard);
-        const b = countLines(botCard);
-        if(p>b) endGame("player");
-        else if(b>p) endGame("bot");
-        else endGame("draw");
-        return;
-      }
-
-      clearHitEffects();
-
-      const n = state.deck.pop();
-      elLastNum.textContent = n;
-      pushCalled(n);
-
-      // auto mark both
-      const pHits = markIfPresent(playerCard, elPlayer, n);
-      const bHits = markIfPresent(botCard, elBot, n);
-      state.lastMarkedCells = [...pHits, ...bHits];
-
-      // make sure FREE stays marked visually
-      syncMarkedStyles(playerCard, elPlayer);
-      syncMarkedStyles(botCard, elBot);
-
-      // update lines
-      const pLines = countLines(playerCard);
-      const bLines = countLines(botCard);
-      elPLines.textContent = String(pLines);
-      elBLines.textContent = String(bLines);
-
-      // win check: first to reach >=1 line (same draw can be tie)
-      const pWin = pLines >= 1;
-      const bWin = bLines >= 1;
-
-      if(pWin && bWin) endGame("draw");
-      else if(pWin) endGame("player");
-      else if(bWin) endGame("bot");
-
-      // remove hit effect shortly
-      if(state.lastMarkedCells.length){
-        setTimeout(() => clearHitEffects(), 240);
-      }
+    function checkEnd(){
+      const w = getWinner(board);
+      if(!w) return false;
+      if(w.winner === "D") finish("D");
+      else finish(w.winner);
+      return true;
     }
 
-    function startAuto(){
-      stopAuto();
-      const ms = Number(speedSel.value || 1200);
-      state.autoTimer = setInterval(() => drawNumber(), ms);
-      drawBtn.disabled = true;
-      setStatus("Auto Mode", "ระบบกำลังสุ่มเลขอัตโนมัติ…", "");
+    function onPlayerMove(i){
+      if(gameOver || locked) return;
+      if(turn !== "X") return;
+      if(board[i]) return;
+
+      board[i] = "X";
+      turn = "O";
+      render();
+
+      if(checkEnd()) return;
+
+      // bot move
+      locked = true;
+      setStatus("ตาบอท (O)...");
+      setTimeout(() => {
+        botMove();
+      }, 220);
     }
 
-    function stopAuto(){
-      if(state.autoTimer){
-        clearInterval(state.autoTimer);
-        state.autoTimer = null;
-      }
-      if(!state.ended){
-        drawBtn.disabled = (modeSel.value === "auto");
-      }
+    function availableMoves(b){
+      const m = [];
+      for(let i=0;i<9;i++) if(!b[i]) m.push(i);
+      return m;
     }
 
-    function resetGame(){
-      // clear timers
-      stopAuto();
+    function botMove(){
+      if(gameOver) return;
 
-      state.called = [];
-      state.calledSet = new Set();
-      state.deck = makeDeck();
-      state.running = false;
-      state.paused = false;
-      state.ended = false;
-      state.lastMarkedCells = [];
+      const diff = difficultyEl.value;
+      const moves = availableMoves(board);
 
-      playerCard = makeCard();
-      botCard = makeCard();
-
-      // render
-      renderCard(elPlayer, playerCard, "player");
-      renderCard(elBot, botCard, "bot");
-
-      // ui
-      elLastNum.textContent = "—";
-      elCalledCount.textContent = "0";
-      elCalledList.innerHTML = "";
-      elPLines.textContent = "0";
-      elBLines.textContent = "0";
-
-      drawBtn.disabled = (modeSel.value === "auto");
-      pauseBtn.disabled = true;
-      pauseBtn.textContent = "พัก";
-      pauseBtn.setAttribute("aria-pressed", "false");
-
-      setStatus("พร้อมเล่น", "กด “สุ่มเลข” เพื่อเริ่ม หรือเลือก Auto", "");
-
-      // keep FREE marked visually
-      syncMarkedStyles(playerCard, elPlayer);
-      syncMarkedStyles(botCard, elBot);
-    }
-
-    // ======= Controls =======
-    drawBtn.addEventListener("click", drawNumber);
-
-    resetBtn.addEventListener("click", resetGame);
-
-    pauseBtn.addEventListener("click", () => {
-      if(state.ended) return;
-      if(!state.running) return;
-
-      state.paused = !state.paused;
-      pauseBtn.setAttribute("aria-pressed", String(state.paused));
-      pauseBtn.textContent = state.paused ? "เล่นต่อ" : "พัก";
-
-      if(state.paused){
-        setStatus("พักเกม", "กด “เล่นต่อ” เพื่อไปต่อ", "");
+      let choice;
+      if(diff === "easy"){
+        // random
+        choice = moves[(Math.random()*moves.length)|0];
+      }else if(diff === "normal"){
+        // 60% smart, 40% random
+        if(Math.random() < 0.60) choice = bestMove(board, "O");
+        else choice = moves[(Math.random()*moves.length)|0];
       }else{
-        setStatus(modeSel.value === "auto" ? "Auto Mode" : "กำลังเล่น",
-                  modeSel.value === "auto" ? "ระบบกำลังสุ่มเลขอัตโนมัติ…" : "สุ่มเลขต่อได้เลย",
-                  "");
+        // hard
+        choice = bestMove(board, "O");
       }
-    });
 
-    modeSel.addEventListener("change", () => {
-      if(state.ended) return;
+      board[choice] = "O";
+      turn = "X";
+      locked = false;
+      render();
 
-      if(modeSel.value === "auto"){
-        // if already playing, start auto; if not, start when auto enabled
-        drawBtn.disabled = true;
-        if(!state.paused){
-          startAuto();
-        }
-      }else{
-        // manual
-        stopAuto();
-        drawBtn.disabled = false;
-        if(state.running && !state.paused){
-          setStatus("กำลังเล่น", "กด “สุ่มเลข” เพื่อเรียกเลขถัดไป", "");
-        }else if(!state.running){
-          setStatus("พร้อมเล่น", "กด “สุ่มเลข” เพื่อเริ่ม", "");
+      if(checkEnd()) return;
+      setStatus("ตาคุณ (X)");
+    }
+
+    // ===== Minimax (perfect play) =====
+    function bestMove(b, player){
+      let bestScore = -Infinity;
+      let move = null;
+      for(const i of availableMoves(b)){
+        const nb = b.slice();
+        nb[i] = player;
+        const s = minimax(nb, 0, false, player);
+        if(s > bestScore){
+          bestScore = s;
+          move = i;
         }
       }
-    });
+      return move;
+    }
 
-    speedSel.addEventListener("change", () => {
-      if(modeSel.value === "auto" && !state.ended && !state.paused){
-        startAuto();
+    // scoring from perspective of bot ("O") by default (player passed)
+    function minimax(b, depth, isMax, botPlayer){
+      const res = getWinner(b);
+      if(res){
+        if(res.winner === "D") return 0;
+        // If botPlayer wins => positive, else negative
+        return (res.winner === botPlayer) ? (10 - depth) : (depth - 10);
       }
-    });
 
-    // Keyboard shortcuts: Space = draw (manual), R = reset, P = pause
+      const bot = botPlayer;
+      const human = (botPlayer === "O") ? "X" : "O";
+
+      if(isMax){
+        let best = -Infinity;
+        for(const i of availableMoves(b)){
+          const nb = b.slice();
+          nb[i] = bot;
+          best = Math.max(best, minimax(nb, depth+1, false, botPlayer));
+        }
+        return best;
+      }else{
+        let best = Infinity;
+        for(const i of availableMoves(b)){
+          const nb = b.slice();
+          nb[i] = human;
+          best = Math.min(best, minimax(nb, depth+1, true, botPlayer));
+        }
+        return best;
+      }
+    }
+
+    function newRound(){
+      board = Array(9).fill(null);
+      turn = "X";
+      locked = false;
+      gameOver = false;
+      setStatus("ตาคุณ (X)");
+      render();
+    }
+
+    function resetScore(){
+      score = {x:0,o:0,d:0};
+      saveScore(score);
+      syncScore();
+      lastResult.textContent = "—";
+    }
+
+    // keyboard shortcuts
     window.addEventListener("keydown", (e) => {
       const k = e.key.toLowerCase();
-      if(k === " "){
-        if(modeSel.value === "manual" && !drawBtn.disabled) { e.preventDefault(); drawNumber(); }
-      }
-      if(k === "r") resetGame();
-      if(k === "p") pauseBtn.click();
-    }, {passive:false});
+      if(k === "n") newRound();
+      if(k === "r") resetScore();
+    });
 
-    // init
-    resetGame();
+    newBtn.addEventListener("click", newRound);
+    resetBtn.addEventListener("click", resetScore);
+
+    // start
+    newRound();
   </script>
 </body>
 </html>
