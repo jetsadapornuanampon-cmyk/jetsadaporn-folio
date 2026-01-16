@@ -3,142 +3,566 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>โย่ว</title>
+  <title>Mini Coin Chase (ไฟล์เดียว)</title>
   <style>
     :root{
-      --bg1:#0b1020;
-      --bg2:#0a2a4a;
+      --bg1:#0b1020; --bg2:#0a2a4a;
       --card: rgba(255,255,255,.08);
-      --stroke: rgba(255,255,255,.18);
-      --glow: rgba(120,180,255,.55);
+      --stroke: rgba(255,255,255,.16);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+      --good:#6ee7ff; --warn:#ffd56a; --bad:#ff6b8b;
     }
-
-    *{ box-sizing: border-box; }
+    *{box-sizing:border-box}
     body{
-      margin:0;
-      min-height:100vh;
-      display:grid;
-      place-items:center;
+      margin:0; min-height:100vh; display:grid; place-items:center;
       font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", sans-serif;
-      color:#fff;
+      color:var(--text);
       background:
         radial-gradient(900px 600px at 20% 20%, rgba(110,160,255,.35), transparent 60%),
         radial-gradient(700px 500px at 80% 30%, rgba(180,120,255,.28), transparent 60%),
         linear-gradient(135deg, var(--bg1), var(--bg2));
       overflow:hidden;
     }
-
-    /* floating blobs */
-    .blob{
-      position:absolute;
-      width:360px; height:360px;
-      border-radius: 999px;
-      filter: blur(40px);
-      opacity:.35;
-      animation: float 10s ease-in-out infinite;
-      pointer-events:none;
+    .wrap{
+      width:min(980px, 94vw);
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
     }
-    .blob.b1{ background:#7ab6ff; top:-120px; left:-120px; }
-    .blob.b2{ background:#c88bff; bottom:-160px; right:-160px; animation-delay: -3s; }
-    @keyframes float{
-      0%,100%{ transform: translate(0,0) scale(1); }
-      50%{ transform: translate(30px, -25px) scale(1.06); }
-    }
-
-    .card{
-      position:relative;
-      padding: 42px 44px;
-      border-radius: 22px;
-      background: var(--card);
-      border: 1px solid var(--stroke);
-      box-shadow:
-        0 20px 60px rgba(0,0,0,.45),
-        0 0 40px rgba(120,180,255,.12);
+    .topbar{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      padding:14px 16px;
+      border:1px solid var(--stroke);
+      background:var(--card);
+      border-radius:18px;
       backdrop-filter: blur(10px);
-      text-align:center;
-      transform: translateZ(0);
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
     }
-
-    .title{
-      font-size: clamp(56px, 8vw, 110px);
-      line-height: 1;
-      margin: 0 0 10px;
-      letter-spacing: .02em;
-      text-shadow:
-        0 0 14px rgba(120,180,255,.35),
-        0 18px 40px rgba(0,0,0,.55);
-      animation: pop 900ms cubic-bezier(.2,.9,.2,1) both;
+    .stats{
+      display:flex; gap:14px; flex-wrap:wrap; align-items:center;
+      font-size:14px; color:var(--muted);
     }
-
-    .subtitle{
+    .pill{
+      display:inline-flex; gap:8px; align-items:center;
+      padding:8px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:var(--good); box-shadow:0 0 14px rgba(110,231,255,.45)}
+    .dot.warn{background:var(--warn); box-shadow:0 0 14px rgba(255,213,106,.38)}
+    .dot.bad{background:var(--bad); box-shadow:0 0 14px rgba(255,107,139,.35)}
+    .actions{display:flex; gap:10px; align-items:center}
+    button{
+      appearance:none; border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.08);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:14px;
+      font-weight:600;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    button:hover{ transform: translateY(-1px); background:rgba(255,255,255,.11); border-color:rgba(255,255,255,.26)}
+    button:active{ transform: translateY(0px) scale(.99)}
+    .gamecard{
+      position:relative;
+      padding:14px;
+      border-radius:18px;
+      border:1px solid var(--stroke);
+      background:var(--card);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    }
+    canvas{
+      width:100%;
+      height:auto;
+      display:block;
+      border-radius:14px;
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(255,255,255,.10), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.14);
+    }
+    .hint{
       margin: 0;
-      opacity:.86;
-      font-size: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      padding: 0 2px;
+      line-height: 1.45;
+    }
+    .kbd{
+      padding:2px 8px; border-radius:10px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.92);
+      font-weight:700;
+      font-size:12px;
     }
 
-    .badge{
-      display:inline-flex;
-      gap:8px;
+    /* Mobile controls */
+    .touch{
+      display:none;
+      gap:10px;
+      margin-top:12px;
       align-items:center;
-      margin-top: 18px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.06);
-      font-size: 14px;
+      justify-content:space-between;
       user-select:none;
+      -webkit-user-select:none;
+    }
+    .pad{
+      display:grid;
+      grid-template-columns: 56px 56px 56px;
+      grid-template-rows: 56px 56px 56px;
+      gap:10px;
+    }
+    .touch button{
+      width:56px; height:56px;
+      border-radius:16px;
+      font-size:18px;
+      padding:0;
+    }
+    .touch .wide{ width: 168px; height:56px; }
+    @media (max-width: 720px){
+      .touch{ display:flex; }
     }
 
-    .dot{
-      width:10px;height:10px;border-radius:999px;
-      background: radial-gradient(circle at 30% 30%, #fff, #7ab6ff);
-      box-shadow: 0 0 16px var(--glow);
-      animation: pulse 1.4s ease-in-out infinite;
-    }
-
-    @keyframes pop{
-      from{ transform: translateY(18px) scale(.96); opacity:0; }
-      to{ transform: translateY(0) scale(1); opacity:1; }
-    }
-    @keyframes pulse{
-      0%,100%{ transform: scale(1); opacity:.9; }
-      50%{ transform: scale(1.35); opacity:1; }
-    }
-
-    /* subtle shine */
-    .shine{
-      position:absolute;
-      inset:-2px;
-      border-radius: 22px;
-      background: linear-gradient(110deg,
-        transparent 0%,
-        rgba(255,255,255,.10) 30%,
-        transparent 60%);
-      transform: translateX(-120%);
-      animation: shine 3.4s ease-in-out infinite;
+    /* Overlay */
+    .overlay{
+      position:absolute; inset:14px;
+      display:grid; place-items:center;
+      border-radius:14px;
+      background: rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(6px);
+      opacity:0;
       pointer-events:none;
-      mix-blend-mode: screen;
+      transition: opacity .18s ease;
     }
-    @keyframes shine{
-      0%,55%{ transform: translateX(-120%); }
-      75%{ transform: translateX(120%); }
-      100%{ transform: translateX(120%); }
+    .overlay.show{ opacity:1; pointer-events:auto; }
+    .panel{
+      width:min(520px, 92%);
+      padding:18px 18px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.10);
+      box-shadow: 0 18px 50px rgba(0,0,0,.40);
+      text-align:center;
     }
+    .panel h2{ margin:0 0 8px; font-size:22px; letter-spacing:.01em}
+    .panel p{ margin:0 0 14px; color:var(--muted); font-size:14px; line-height:1.5}
+    .row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
   </style>
 </head>
 <body>
-  <div class="blob b1"></div>
-  <div class="blob b2"></div>
-
-  <main class="card" role="main" aria-label="Yo">
-    <div class="shine"></div>
-    <h1 class="title">โย่ว</h1>
-    <p class="subtitle">สวัสดี 👋 นี่คือหน้า HTML แบบตกแต่ง</p>
-
-    <div class="badge">
-      <span class="dot" aria-hidden="true"></span>
-      <span>พร้อมใช้งาน • HTML + CSS</span>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="stats">
+        <span class="pill"><span class="dot"></span>คะแนน: <b id="score">0</b></span>
+        <span class="pill"><span class="dot warn"></span>เวลา: <b id="time">30.0</b>s</span>
+        <span class="pill"><span class="dot bad"></span>สถิติสูงสุด: <b id="best">0</b></span>
+      </div>
+      <div class="actions">
+        <button id="btnStart">เริ่ม/รีสตาร์ท</button>
+        <button id="btnPause" aria-pressed="false">พัก</button>
+      </div>
     </div>
-  </main>
+
+    <div class="gamecard">
+      <canvas id="c" width="900" height="520" aria-label="เกมเก็บเหรียญ"></canvas>
+
+      <div id="overlay" class="overlay show">
+        <div class="panel">
+          <h2>Mini Coin Chase</h2>
+          <p>
+            เก็บเหรียญให้ได้มากที่สุดก่อนหมดเวลา <br/>
+            ใช้ <span class="kbd">WASD</span> / <span class="kbd">ลูกศร</span> หรือปุ่มบนจอมือถือ
+          </p>
+          <div class="row">
+            <button id="btnPlay">เล่นเลย</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="touch">
+        <div class="pad" aria-label="ปุ่มบังคับทิศทาง">
+          <span></span><button data-dir="up">↑</button><span></span>
+          <button data-dir="left">←</button><button data-dir="down">↓</button><button data-dir="right">→</button>
+          <span></span><span></span><span></span>
+        </div>
+        <div style="display:flex; gap:10px; flex-direction:column; align-items:flex-end;">
+          <button class="wide" id="btnBoost">บูสต์ (ค้าง)</button>
+          <p class="hint" style="text-align:right; max-width:200px;">
+            ทิป: แตะค้างทิศทางเพื่อเดินต่อเนื่อง
+          </p>
+        </div>
+      </div>
+
+      <p class="hint" style="margin-top:10px;">
+        เป้าหมาย: เก็บเหรียญ (●) ให้เยอะ ระวังศัตรู (✕) ชนแล้วจบเกม — เหรียญ/ศัตรูจะเกิดใหม่เรื่อย ๆ
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // ===== Utilities =====
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const rand = (a, b) => a + Math.random() * (b - a);
+    const dist2 = (ax, ay, bx, by) => {
+      const dx = ax - bx, dy = ay - by;
+      return dx*dx + dy*dy;
+    };
+
+    // ===== Canvas setup =====
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height;
+
+    // ===== UI =====
+    const elScore = document.getElementById("score");
+    const elTime  = document.getElementById("time");
+    const elBest  = document.getElementById("best");
+    const overlay = document.getElementById("overlay");
+    const btnStart = document.getElementById("btnStart");
+    const btnPause = document.getElementById("btnPause");
+    const btnPlay  = document.getElementById("btnPlay");
+    const btnBoost = document.getElementById("btnBoost");
+
+    // best score from localStorage
+    const BEST_KEY = "mini_coin_chase_best";
+    let best = Number(localStorage.getItem(BEST_KEY) || 0);
+    elBest.textContent = best;
+
+    // ===== Game state =====
+    const state = {
+      running: false,
+      paused: false,
+      over: false,
+      score: 0,
+      time: 30.0,
+      lastTs: 0,
+      keys: new Set(),
+      boost: false
+    };
+
+    const player = {
+      x: W*0.25, y: H*0.5,
+      r: 14,
+      speed: 260
+    };
+
+    const coin = {
+      x: rand(60, W-60),
+      y: rand(60, H-60),
+      r: 10
+    };
+
+    const enemy = {
+      x: W*0.75, y: H*0.5,
+      r: 16,
+      vx: 180,
+      vy: 140
+    };
+
+    // Spawn helpers
+    function respawnCoin() {
+      // avoid spawning too close to player
+      for (let i=0;i<40;i++){
+        const x = rand(40, W-40), y = rand(40, H-40);
+        if (dist2(x,y, player.x, player.y) > (140*140)) {
+          coin.x = x; coin.y = y; return;
+        }
+      }
+      coin.x = rand(40, W-40); coin.y = rand(40, H-40);
+    }
+
+    function resetEnemy() {
+      enemy.x = rand(W*0.55, W-60);
+      enemy.y = rand(60, H-60);
+      const s = rand(150, 240);
+      const a = rand(0, Math.PI*2);
+      enemy.vx = Math.cos(a)*s;
+      enemy.vy = Math.sin(a)*s;
+    }
+
+    function resetGame() {
+      state.running = true;
+      state.paused = false;
+      state.over = false;
+      state.score = 0;
+      state.time = 30.0;
+      state.lastTs = performance.now();
+      player.x = W*0.25; player.y = H*0.5;
+      respawnCoin();
+      resetEnemy();
+      elScore.textContent = state.score;
+      elTime.textContent = state.time.toFixed(1);
+      btnPause.setAttribute("aria-pressed", "false");
+      btnPause.textContent = "พัก";
+      overlay.classList.remove("show");
+    }
+
+    function gameOver(msg) {
+      state.over = true;
+      state.running = false;
+      overlay.classList.add("show");
+      overlay.querySelector("h2").textContent = msg || "จบเกม!";
+      overlay.querySelector("p").innerHTML =
+        `คะแนนของคุณ: <b>${state.score}</b> <br/>กด เริ่ม/รีสตาร์ท เพื่อเล่นใหม่`;
+      if (state.score > best) {
+        best = state.score;
+        localStorage.setItem(BEST_KEY, String(best));
+        elBest.textContent = best;
+      }
+    }
+
+    // ===== Input =====
+    function setKey(e, down) {
+      const k = e.key.toLowerCase();
+      if (["arrowup","arrowdown","arrowleft","arrowright","w","a","s","d"," "].includes(k)) {
+        e.preventDefault();
+      }
+      if (down) state.keys.add(k);
+      else state.keys.delete(k);
+
+      if (k === " " && down) state.boost = true;
+      if (k === " " && !down) state.boost = false;
+    }
+
+    window.addEventListener("keydown", e => setKey(e, true), {passive:false});
+    window.addEventListener("keyup", e => setKey(e, false), {passive:false});
+
+    // Touch directional buttons (hold to move)
+    const dirBtns = document.querySelectorAll("[data-dir]");
+    const touchHold = { up:false, down:false, left:false, right:false };
+
+    function touchDir(dir, on){
+      touchHold[dir] = on;
+    }
+    dirBtns.forEach(btn=>{
+      const dir = btn.dataset.dir;
+      const start = (e)=>{ e.preventDefault(); touchDir(dir, true); };
+      const end   = (e)=>{ e.preventDefault(); touchDir(dir, false); };
+      btn.addEventListener("pointerdown", start);
+      btn.addEventListener("pointerup", end);
+      btn.addEventListener("pointercancel", end);
+      btn.addEventListener("pointerleave", end);
+    });
+
+    // Boost button
+    const boostOn = (e)=>{ e.preventDefault(); state.boost = true; };
+    const boostOff= (e)=>{ e.preventDefault(); state.boost = false; };
+    btnBoost.addEventListener("pointerdown", boostOn);
+    btnBoost.addEventListener("pointerup", boostOff);
+    btnBoost.addEventListener("pointercancel", boostOff);
+    btnBoost.addEventListener("pointerleave", boostOff);
+
+    // ===== Buttons =====
+    btnStart.addEventListener("click", () => resetGame());
+    btnPlay.addEventListener("click", () => resetGame());
+    btnPause.addEventListener("click", () => {
+      if (!state.running && !state.over) return;
+      state.paused = !state.paused;
+      btnPause.setAttribute("aria-pressed", String(state.paused));
+      btnPause.textContent = state.paused ? "เล่นต่อ" : "พัก";
+      if (!state.paused) state.lastTs = performance.now();
+    });
+
+    // ===== Game loop =====
+    function update(dt) {
+      // timer
+      state.time -= dt;
+      if (state.time <= 0) {
+        state.time = 0;
+        elTime.textContent = state.time.toFixed(1);
+        gameOver("หมดเวลา!");
+        return;
+      }
+      elTime.textContent = state.time.toFixed(1);
+
+      // movement
+      const speed = player.speed * (state.boost ? 1.55 : 1.0);
+      let dx = 0, dy = 0;
+
+      // keyboard
+      const k = state.keys;
+      if (k.has("arrowup") || k.has("w")) dy -= 1;
+      if (k.has("arrowdown") || k.has("s")) dy += 1;
+      if (k.has("arrowleft") || k.has("a")) dx -= 1;
+      if (k.has("arrowright") || k.has("d")) dx += 1;
+
+      // touch hold
+      if (touchHold.up) dy -= 1;
+      if (touchHold.down) dy += 1;
+      if (touchHold.left) dx -= 1;
+      if (touchHold.right) dx += 1;
+
+      // normalize
+      if (dx || dy) {
+        const len = Math.hypot(dx, dy);
+        dx /= len; dy /= len;
+        player.x += dx * speed * dt;
+        player.y += dy * speed * dt;
+      }
+
+      // keep inside bounds
+      player.x = clamp(player.x, player.r+10, W - player.r-10);
+      player.y = clamp(player.y, player.r+10, H - player.r-10);
+
+      // enemy bounce
+      enemy.x += enemy.vx * dt;
+      enemy.y += enemy.vy * dt;
+      if (enemy.x < enemy.r+10){ enemy.x = enemy.r+10; enemy.vx *= -1; }
+      if (enemy.x > W-enemy.r-10){ enemy.x = W-enemy.r-10; enemy.vx *= -1; }
+      if (enemy.y < enemy.r+10){ enemy.y = enemy.r+10; enemy.vy *= -1; }
+      if (enemy.y > H-enemy.r-10){ enemy.y = H-enemy.r-10; enemy.vy *= -1; }
+
+      // coin collect
+      const hitCoin = dist2(player.x, player.y, coin.x, coin.y) <= (player.r + coin.r + 4) ** 2;
+      if (hitCoin) {
+        state.score += 1;
+        elScore.textContent = state.score;
+
+        // add a little time as reward
+        state.time = Math.min(40, state.time + 1.2);
+        respawnCoin();
+
+        // enemy gets a bit faster every few points
+        const mult = 1 + Math.floor(state.score / 5) * 0.08;
+        const cap = 420;
+        enemy.vx = clamp(enemy.vx * mult, -cap, cap);
+        enemy.vy = clamp(enemy.vy * mult, -cap, cap);
+      }
+
+      // enemy collision
+      const hitEnemy = dist2(player.x, player.y, enemy.x, enemy.y) <= (player.r + enemy.r + 2) ** 2;
+      if (hitEnemy) {
+        gameOver("โดนศัตรูชน!");
+        return;
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0,0,W,H);
+
+      // grid-ish dots
+      ctx.globalAlpha = 0.12;
+      ctx.fillStyle = "#ffffff";
+      for (let y=20; y<H; y+=40){
+        for (let x=20; x<W; x+=40){
+          ctx.beginPath();
+          ctx.arc(x, y, 1.2, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+
+      // arena border
+      ctx.strokeStyle = "rgba(255,255,255,.16)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(10, 10, W-20, H-20);
+
+      // coin
+      drawGlowCircle(coin.x, coin.y, coin.r, "rgba(110,231,255,.9)", "rgba(110,231,255,.22)");
+      // enemy
+      drawX(enemy.x, enemy.y, enemy.r, "rgba(255,107,139,.95)");
+      // player
+      drawPlayer(player.x, player.y, player.r);
+
+      // UI text inside canvas
+      ctx.fillStyle = "rgba(255,255,255,.78)";
+      ctx.font = "700 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans Thai, sans-serif";
+      ctx.fillText("เก็บ ● หนี ✕", 24, 40);
+
+      if (state.paused && state.running) {
+        ctx.fillStyle = "rgba(0,0,0,.35)";
+        ctx.fillRect(10,10,W-20,H-20);
+        ctx.fillStyle = "rgba(255,255,255,.92)";
+        ctx.font = "800 34px ui-sans-serif, system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText("พักเกม", W/2, H/2 - 8);
+        ctx.font = "600 16px ui-sans-serif, system-ui";
+        ctx.fillStyle = "rgba(255,255,255,.78)";
+        ctx.fillText("กดปุ่ม 'เล่นต่อ' เพื่อกลับมา", W/2, H/2 + 22);
+        ctx.textAlign = "left";
+      }
+    }
+
+    function drawGlowCircle(x,y,r,fill,glow){
+      ctx.save();
+      ctx.shadowColor = glow;
+      ctx.shadowBlur = 18;
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+
+      // small highlight
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(x - r*0.25, y - r*0.25, Math.max(2, r*0.28), 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    function drawX(x,y,r,color){
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 5;
+      ctx.lineCap = "round";
+      ctx.shadowColor = "rgba(255,107,139,.28)";
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.moveTo(x-r, y-r);
+      ctx.lineTo(x+r, y+r);
+      ctx.moveTo(x+r, y-r);
+      ctx.lineTo(x-r, y+r);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawPlayer(x,y,r){
+      ctx.save();
+      // body
+      ctx.shadowColor = "rgba(255,255,255,.10)";
+      ctx.shadowBlur = 18;
+      ctx.fillStyle = "rgba(255,255,255,.90)";
+      ctx.beginPath();
+      ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fill();
+
+      // outline
+      ctx.strokeStyle = "rgba(255,255,255,.22)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // face
+      ctx.fillStyle = "rgba(0,0,0,.55)";
+      ctx.beginPath(); ctx.arc(x - r*0.28, y - r*0.12, 2.4, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + r*0.28, y - r*0.12, 2.4, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y + r*0.18, 3.2, 0, Math.PI*2); ctx.fill();
+
+      ctx.restore();
+    }
+
+    function loop(ts){
+      if (!state.running) { draw(); requestAnimationFrame(loop); return; }
+      if (state.paused)   { draw(); requestAnimationFrame(loop); return; }
+
+      const dt = clamp((ts - state.lastTs) / 1000, 0, 0.05);
+      state.lastTs = ts;
+
+      update(dt);
+      draw();
+
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    // Start with overlay shown
+    overlay.classList.add("show");
+  </script>
 </body>
 </html>
