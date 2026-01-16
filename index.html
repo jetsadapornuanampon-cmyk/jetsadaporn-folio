@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mini Coin Chase (ไฟล์เดียว)</title>
+  <title>Bingo vs Bot (ไฟล์เดียว)</title>
   <style>
     :root{
       --bg1:#0b1020; --bg2:#0a2a4a;
@@ -11,9 +11,10 @@
       --stroke: rgba(255,255,255,.16);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.72);
-      --good:#6ee7ff; --warn:#ffd56a; --bad:#ff6b8b;
+      --good:#6ee7ff; --warn:#ffd56a; --bad:#ff6b8b; --ok:#a6ff9a;
+      --shadow: 0 18px 50px rgba(0,0,0,.35);
     }
-    *{box-sizing:border-box}
+    *{ box-sizing:border-box; }
     body{
       margin:0; min-height:100vh; display:grid; place-items:center;
       font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", sans-serif;
@@ -22,12 +23,11 @@
         radial-gradient(900px 600px at 20% 20%, rgba(110,160,255,.35), transparent 60%),
         radial-gradient(700px 500px at 80% 30%, rgba(180,120,255,.28), transparent 60%),
         linear-gradient(135deg, var(--bg1), var(--bg2));
-      overflow:hidden;
+      overflow-x:hidden;
     }
     .wrap{
-      width:min(980px, 94vw);
+      width:min(1100px, 94vw);
       display:grid;
-      grid-template-columns: 1fr;
       gap:14px;
     }
     .topbar{
@@ -37,532 +37,693 @@
       background:var(--card);
       border-radius:18px;
       backdrop-filter: blur(10px);
-      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      box-shadow: var(--shadow);
+      flex-wrap:wrap;
     }
-    .stats{
-      display:flex; gap:14px; flex-wrap:wrap; align-items:center;
-      font-size:14px; color:var(--muted);
+    .title{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .badge{
+      display:inline-flex; gap:8px; align-items:center;
+      padding:8px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      font-size:13px; color:var(--muted);
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:var(--good); box-shadow:0 0 14px rgba(110,231,255,.45)}
+    .dot.ok{background:var(--ok); box-shadow:0 0 14px rgba(166,255,154,.35)}
+    .dot.warn{background:var(--warn); box-shadow:0 0 14px rgba(255,213,106,.38)}
+    .actions{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    button, select{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.08);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:14px;
+      font-weight:700;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    select{ font-weight:700; }
+    button:hover, select:hover{ transform: translateY(-1px); background:rgba(255,255,255,.11); border-color:rgba(255,255,255,.26)}
+    button:active{ transform: translateY(0px) scale(.99)}
+    button:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:14px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .panel{
+      border:1px solid var(--stroke);
+      background:var(--card);
+      border-radius:18px;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+
+    .boards{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+    }
+    @media (max-width: 820px){
+      .boards{ grid-template-columns: 1fr; }
+    }
+
+    .boardHeader{
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:10px;
+      gap:10px;
+    }
+    .name{
+      display:flex; align-items:center; gap:10px;
+      font-size:16px;
+      font-weight:900;
+      letter-spacing:.02em;
+    }
+    .small{
+      font-size:12px; color:var(--muted); font-weight:700;
+    }
+
+    .bingoCard{
+      width:100%;
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap:10px;
+      padding:12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.12);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .cell{
+      position:relative;
+      aspect-ratio: 1 / 1;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      font-size: clamp(16px, 2.2vw, 22px);
+      user-select:none;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .cell.free{
+      background: rgba(110,231,255,.10);
+      border-color: rgba(110,231,255,.25);
+    }
+    .cell.marked{
+      background: rgba(166,255,154,.12);
+      border-color: rgba(166,255,154,.28);
+      box-shadow: 0 0 0 1px rgba(166,255,154,.12) inset;
+    }
+    .cell.marked::after{
+      content:"✓";
+      position:absolute;
+      top:6px; right:8px;
+      font-size:14px;
+      opacity:.85;
+    }
+    .cell.hit{
+      animation: pop .18s ease-out both;
+      border-color: rgba(255,213,106,.35);
+      background: rgba(255,213,106,.10);
+    }
+    @keyframes pop{
+      from{ transform: scale(.96); }
+      to{ transform: scale(1); }
+    }
+
+    .statusRow{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .bigCall{
+      flex: 1;
+      min-width: 220px;
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.12);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px;
+    }
+    .bigCall .label{ color:var(--muted); font-weight:800; font-size:12px; }
+    .bigCall .num{
+      font-size:28px;
+      font-weight:1000;
+      letter-spacing:.02em;
+    }
+    .meter{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
     }
     .pill{
       display:inline-flex; gap:8px; align-items:center;
       padding:8px 10px; border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.06);
+      font-size:13px; color:var(--muted);
+      font-weight:800;
     }
-    .dot{width:10px;height:10px;border-radius:999px;background:var(--good); box-shadow:0 0 14px rgba(110,231,255,.45)}
-    .dot.warn{background:var(--warn); box-shadow:0 0 14px rgba(255,213,106,.38)}
-    .dot.bad{background:var(--bad); box-shadow:0 0 14px rgba(255,107,139,.35)}
-    .actions{display:flex; gap:10px; align-items:center}
-    button{
-      appearance:none; border:1px solid rgba(255,255,255,.18);
-      background:rgba(255,255,255,.08);
-      color:var(--text);
-      padding:10px 12px;
-      border-radius:14px;
-      font-weight:600;
-      cursor:pointer;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
-    }
-    button:hover{ transform: translateY(-1px); background:rgba(255,255,255,.11); border-color:rgba(255,255,255,.26)}
-    button:active{ transform: translateY(0px) scale(.99)}
-    .gamecard{
-      position:relative;
-      padding:14px;
-      border-radius:18px;
-      border:1px solid var(--stroke);
-      background:var(--card);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 18px 50px rgba(0,0,0,.35);
-    }
-    canvas{
-      width:100%;
-      height:auto;
-      display:block;
-      border-radius:14px;
-      background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(255,255,255,.10), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    .pill b{ color:var(--text); }
+
+    .calledBox{
+      padding:12px;
+      border-radius:16px;
       border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.12);
     }
+    .calledHeader{
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      margin-bottom:8px;
+    }
+    .calledList{
+      display:flex; flex-wrap:wrap; gap:8px;
+      max-height: 180px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .tag{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      font-weight:900;
+      font-size:12px;
+      color: rgba(255,255,255,.86);
+    }
+    .tag.last{
+      border-color: rgba(255,213,106,.35);
+      background: rgba(255,213,106,.10);
+    }
+
+    .result{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.12);
+      font-weight:900;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .result .msg{ font-size:14px; color:var(--muted); font-weight:800; }
+    .result .win{ color: var(--ok); }
+    .result .lose{ color: var(--bad); }
+    .result .draw{ color: var(--warn); }
+
     .hint{
-      margin: 0;
+      margin: 8px 2px 0;
       font-size: 13px;
       color: var(--muted);
-      padding: 0 2px;
-      line-height: 1.45;
+      line-height:1.45;
     }
     .kbd{
       padding:2px 8px; border-radius:10px;
       border:1px solid rgba(255,255,255,.18);
       background: rgba(0,0,0,.18);
       color: rgba(255,255,255,.92);
-      font-weight:700;
+      font-weight:900;
       font-size:12px;
     }
-
-    /* Mobile controls */
-    .touch{
-      display:none;
-      gap:10px;
-      margin-top:12px;
-      align-items:center;
-      justify-content:space-between;
-      user-select:none;
-      -webkit-user-select:none;
-    }
-    .pad{
-      display:grid;
-      grid-template-columns: 56px 56px 56px;
-      grid-template-rows: 56px 56px 56px;
-      gap:10px;
-    }
-    .touch button{
-      width:56px; height:56px;
-      border-radius:16px;
-      font-size:18px;
-      padding:0;
-    }
-    .touch .wide{ width: 168px; height:56px; }
-    @media (max-width: 720px){
-      .touch{ display:flex; }
-    }
-
-    /* Overlay */
-    .overlay{
-      position:absolute; inset:14px;
-      display:grid; place-items:center;
-      border-radius:14px;
-      background: rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.14);
-      backdrop-filter: blur(6px);
-      opacity:0;
-      pointer-events:none;
-      transition: opacity .18s ease;
-    }
-    .overlay.show{ opacity:1; pointer-events:auto; }
-    .panel{
-      width:min(520px, 92%);
-      padding:18px 18px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.10);
-      box-shadow: 0 18px 50px rgba(0,0,0,.40);
-      text-align:center;
-    }
-    .panel h2{ margin:0 0 8px; font-size:22px; letter-spacing:.01em}
-    .panel p{ margin:0 0 14px; color:var(--muted); font-size:14px; line-height:1.5}
-    .row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
   </style>
 </head>
 <body>
   <div class="wrap">
+
     <div class="topbar">
-      <div class="stats">
-        <span class="pill"><span class="dot"></span>คะแนน: <b id="score">0</b></span>
-        <span class="pill"><span class="dot warn"></span>เวลา: <b id="time">30.0</b>s</span>
-        <span class="pill"><span class="dot bad"></span>สถิติสูงสุด: <b id="best">0</b></span>
+      <div class="title">
+        <div style="font-weight:1000; font-size:18px;">Bingo vs Bot</div>
+        <span class="badge"><span class="dot"></span> 5x5 • FREE ตรงกลาง</span>
+        <span class="badge"><span class="dot ok"></span> ชนะเมื่อได้ 1 เส้น</span>
       </div>
+
       <div class="actions">
-        <button id="btnStart">เริ่ม/รีสตาร์ท</button>
-        <button id="btnPause" aria-pressed="false">พัก</button>
+        <select id="mode" title="โหมดสุ่มเลข">
+          <option value="manual">กดสุ่มเอง (Manual)</option>
+          <option value="auto">สุ่มอัตโนมัติ (Auto)</option>
+        </select>
+        <select id="speed" title="ความเร็ว Auto">
+          <option value="1200">Auto: 1.2s</option>
+          <option value="900">Auto: 0.9s</option>
+          <option value="650">Auto: 0.65s</option>
+        </select>
+        <button id="drawBtn">สุ่มเลข</button>
+        <button id="pauseBtn" aria-pressed="false">พัก</button>
+        <button id="resetBtn">เริ่มใหม่</button>
       </div>
     </div>
 
-    <div class="gamecard">
-      <canvas id="c" width="900" height="520" aria-label="เกมเก็บเหรียญ"></canvas>
+    <div class="grid">
 
-      <div id="overlay" class="overlay show">
-        <div class="panel">
-          <h2>Mini Coin Chase</h2>
-          <p>
-            เก็บเหรียญให้ได้มากที่สุดก่อนหมดเวลา <br/>
-            ใช้ <span class="kbd">WASD</span> / <span class="kbd">ลูกศร</span> หรือปุ่มบนจอมือถือ
-          </p>
-          <div class="row">
-            <button id="btnPlay">เล่นเลย</button>
+      <div class="panel">
+        <div class="statusRow">
+          <div class="bigCall">
+            <div>
+              <div class="label">เลขล่าสุด</div>
+              <div class="num" id="lastNum">—</div>
+            </div>
+            <div class="meter">
+              <span class="pill"><span class="dot warn"></span>เรียกไปแล้ว: <b id="calledCount">0</b>/75</span>
+              <span class="pill"><span class="dot"></span>เส้นคุณ: <b id="pLines">0</b></span>
+              <span class="pill"><span class="dot bad"></span>เส้นบอท: <b id="bLines">0</b></span>
+            </div>
           </div>
         </div>
+
+        <div class="boards">
+          <div>
+            <div class="boardHeader">
+              <div class="name"><span class="dot ok"></span> คุณ <span class="small">(ระบบติ๊กให้อัตโนมัติ)</span></div>
+              <div class="small">เลขบนการ์ด: 1–75</div>
+            </div>
+            <div class="bingoCard" id="playerCard" aria-label="การ์ดของคุณ"></div>
+          </div>
+
+          <div>
+            <div class="boardHeader">
+              <div class="name"><span class="dot bad"></span> บอท <span class="small">(ติ๊กให้อัตโนมัติ)</span></div>
+              <div class="small">โชคเหมือนกัน แต่การ์ดคนละใบ</div>
+            </div>
+            <div class="bingoCard" id="botCard" aria-label="การ์ดของบอท"></div>
+          </div>
+        </div>
+
+        <div class="result" id="resultBox">
+          <div>
+            <div style="font-weight:1000;">สถานะ: <span id="stateText">พร้อมเล่น</span></div>
+            <div class="msg" id="stateHint">กด “สุ่มเลข” เพื่อเริ่ม หรือเลือก Auto</div>
+          </div>
+          <div id="winnerTag" style="font-weight:1000;"></div>
+        </div>
+
+        <p class="hint">
+          • ชนะเมื่อได้ครบ <b>1 เส้น</b> (แถว/คอลัมน์/ทแยง) <br>
+          • ช่องกลางเป็น <span class="kbd">FREE</span> ติ๊กให้แล้ว <br>
+          • โหมด Auto จะเรียกเลขเองตามความเร็วที่เลือก
+        </p>
       </div>
 
-      <div class="touch">
-        <div class="pad" aria-label="ปุ่มบังคับทิศทาง">
-          <span></span><button data-dir="up">↑</button><span></span>
-          <button data-dir="left">←</button><button data-dir="down">↓</button><button data-dir="right">→</button>
-          <span></span><span></span><span></span>
+      <div class="panel">
+        <div class="calledBox">
+          <div class="calledHeader">
+            <div style="font-weight:1000;">เลขที่ถูกเรียก</div>
+            <div class="small">ล่าสุดอยู่ซ้ายสุด</div>
+          </div>
+          <div class="calledList" id="calledList"></div>
         </div>
-        <div style="display:flex; gap:10px; flex-direction:column; align-items:flex-end;">
-          <button class="wide" id="btnBoost">บูสต์ (ค้าง)</button>
-          <p class="hint" style="text-align:right; max-width:200px;">
-            ทิป: แตะค้างทิศทางเพื่อเดินต่อเนื่อง
-          </p>
-        </div>
+
+        <p class="hint">
+          ทิปสำหรับ “แข่ง”: ตั้งโหมด Auto แล้วปล่อยให้เกมตัดสินเองว่าใคร Bingo ก่อน 🎯
+        </p>
       </div>
 
-      <p class="hint" style="margin-top:10px;">
-        เป้าหมาย: เก็บเหรียญ (●) ให้เยอะ ระวังศัตรู (✕) ชนแล้วจบเกม — เหรียญ/ศัตรูจะเกิดใหม่เรื่อย ๆ
-      </p>
     </div>
   </div>
 
   <script>
-    // ===== Utilities =====
-    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-    const rand = (a, b) => a + Math.random() * (b - a);
-    const dist2 = (ax, ay, bx, by) => {
-      const dx = ax - bx, dy = ay - by;
-      return dx*dx + dy*dy;
-    };
+    // ======= Bingo vs Bot (single file) =======
+    const SIZE = 5;
+    const MAX_NUM = 75;
 
-    // ===== Canvas setup =====
-    const canvas = document.getElementById("c");
-    const ctx = canvas.getContext("2d");
-    const W = canvas.width, H = canvas.height;
+    const elPlayer = document.getElementById("playerCard");
+    const elBot = document.getElementById("botCard");
+    const elLastNum = document.getElementById("lastNum");
+    const elCalledCount = document.getElementById("calledCount");
+    const elCalledList = document.getElementById("calledList");
+    const elPLines = document.getElementById("pLines");
+    const elBLines = document.getElementById("bLines");
+    const elStateText = document.getElementById("stateText");
+    const elStateHint = document.getElementById("stateHint");
+    const elWinnerTag = document.getElementById("winnerTag");
 
-    // ===== UI =====
-    const elScore = document.getElementById("score");
-    const elTime  = document.getElementById("time");
-    const elBest  = document.getElementById("best");
-    const overlay = document.getElementById("overlay");
-    const btnStart = document.getElementById("btnStart");
-    const btnPause = document.getElementById("btnPause");
-    const btnPlay  = document.getElementById("btnPlay");
-    const btnBoost = document.getElementById("btnBoost");
+    const drawBtn = document.getElementById("drawBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+    const modeSel = document.getElementById("mode");
+    const speedSel = document.getElementById("speed");
 
-    // best score from localStorage
-    const BEST_KEY = "mini_coin_chase_best";
-    let best = Number(localStorage.getItem(BEST_KEY) || 0);
-    elBest.textContent = best;
-
-    // ===== Game state =====
     const state = {
+      called: [],
+      calledSet: new Set(),
+      deck: [],
       running: false,
       paused: false,
-      over: false,
-      score: 0,
-      time: 30.0,
-      lastTs: 0,
-      keys: new Set(),
-      boost: false
+      ended: false,
+      autoTimer: null,
+      lastMarkedCells: [] // for visual hit flash
     };
 
-    const player = {
-      x: W*0.25, y: H*0.5,
-      r: 14,
-      speed: 260
-    };
+    function shuffle(arr){
+      for(let i=arr.length-1;i>0;i--){
+        const j = (Math.random()*(i+1))|0;
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
 
-    const coin = {
-      x: rand(60, W-60),
-      y: rand(60, H-60),
-      r: 10
-    };
+    function makeDeck(){
+      const d = [];
+      for(let i=1;i<=MAX_NUM;i++) d.push(i);
+      return shuffle(d);
+    }
 
-    const enemy = {
-      x: W*0.75, y: H*0.5,
-      r: 16,
-      vx: 180,
-      vy: 140
-    };
+    function makeCard(){
+      // pick 24 unique numbers from 1..75; center is FREE
+      const pool = makeDeck().slice(0, 24);
+      const grid = [];
+      let k = 0;
+      for(let r=0;r<SIZE;r++){
+        const row = [];
+        for(let c=0;c<SIZE;c++){
+          if(r===2 && c===2){
+            row.push({ value: "FREE", marked: true, free: true });
+          }else{
+            row.push({ value: pool[k++], marked: false, free: false });
+          }
+        }
+        grid.push(row);
+      }
+      return grid;
+    }
 
-    // Spawn helpers
-    function respawnCoin() {
-      // avoid spawning too close to player
-      for (let i=0;i<40;i++){
-        const x = rand(40, W-40), y = rand(40, H-40);
-        if (dist2(x,y, player.x, player.y) > (140*140)) {
-          coin.x = x; coin.y = y; return;
+    function renderCard(el, card, who){
+      el.innerHTML = "";
+      for(let r=0;r<SIZE;r++){
+        for(let c=0;c<SIZE;c++){
+          const cell = document.createElement("div");
+          cell.className = "cell" + (card[r][c].free ? " free marked" : "");
+          cell.dataset.r = r;
+          cell.dataset.c = c;
+          cell.dataset.who = who;
+          cell.textContent = card[r][c].value;
+          el.appendChild(cell);
         }
       }
-      coin.x = rand(40, W-40); coin.y = rand(40, H-40);
     }
 
-    function resetEnemy() {
-      enemy.x = rand(W*0.55, W-60);
-      enemy.y = rand(60, H-60);
-      const s = rand(150, 240);
-      const a = rand(0, Math.PI*2);
-      enemy.vx = Math.cos(a)*s;
-      enemy.vy = Math.sin(a)*s;
+    function markIfPresent(card, el, number){
+      // mark matching number; return list of touched DOM cells for animation
+      const hits = [];
+      for(let r=0;r<SIZE;r++){
+        for(let c=0;c<SIZE;c++){
+          const cell = card[r][c];
+          if(!cell.free && cell.value === number && !cell.marked){
+            cell.marked = true;
+            const dom = el.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+            if(dom){
+              dom.classList.add("marked","hit");
+              hits.push(dom);
+            }
+          }
+        }
+      }
+      // update marked styles for already marked cells (in case of rerender needs)
+      // (we do minimal work; only new hit cells get "hit")
+      return hits;
     }
 
-    function resetGame() {
-      state.running = true;
-      state.paused = false;
-      state.over = false;
-      state.score = 0;
-      state.time = 30.0;
-      state.lastTs = performance.now();
-      player.x = W*0.25; player.y = H*0.5;
-      respawnCoin();
-      resetEnemy();
-      elScore.textContent = state.score;
-      elTime.textContent = state.time.toFixed(1);
-      btnPause.setAttribute("aria-pressed", "false");
-      btnPause.textContent = "พัก";
-      overlay.classList.remove("show");
+    function syncMarkedStyles(card, el){
+      for(let r=0;r<SIZE;r++){
+        for(let c=0;c<SIZE;c++){
+          const dom = el.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+          if(!dom) continue;
+          dom.classList.toggle("marked", !!card[r][c].marked);
+          dom.classList.toggle("free", !!card[r][c].free);
+        }
+      }
     }
 
-    function gameOver(msg) {
-      state.over = true;
+    function countLines(card){
+      let lines = 0;
+
+      // rows
+      for(let r=0;r<SIZE;r++){
+        let ok = true;
+        for(let c=0;c<SIZE;c++) if(!card[r][c].marked) { ok=false; break; }
+        if(ok) lines++;
+      }
+      // cols
+      for(let c=0;c<SIZE;c++){
+        let ok = true;
+        for(let r=0;r<SIZE;r++) if(!card[r][c].marked) { ok=false; break; }
+        if(ok) lines++;
+      }
+      // diag \
+      {
+        let ok = true;
+        for(let i=0;i<SIZE;i++) if(!card[i][i].marked) { ok=false; break; }
+        if(ok) lines++;
+      }
+      // diag /
+      {
+        let ok = true;
+        for(let i=0;i<SIZE;i++) if(!card[i][SIZE-1-i].marked) { ok=false; break; }
+        if(ok) lines++;
+      }
+
+      return lines;
+    }
+
+    function setStatus(text, hint, tagText, tagClass){
+      elStateText.textContent = text;
+      elStateHint.textContent = hint || "";
+      elWinnerTag.textContent = tagText || "";
+      elWinnerTag.className = tagClass || "";
+    }
+
+    let playerCard, botCard;
+
+    function clearHitEffects(){
+      // remove "hit" class after short time
+      state.lastMarkedCells.forEach(dom => dom.classList.remove("hit"));
+      state.lastMarkedCells = [];
+    }
+
+    function pushCalled(number){
+      state.called.unshift(number);
+      state.calledSet.add(number);
+      elCalledCount.textContent = String(state.called.length);
+
+      const tag = document.createElement("span");
+      tag.className = "tag last";
+      tag.textContent = number;
+      elCalledList.prepend(tag);
+
+      // demote previous "last"
+      const tags = elCalledList.querySelectorAll(".tag");
+      tags.forEach((t, idx) => {
+        if(idx === 0) t.classList.add("last");
+        else t.classList.remove("last");
+      });
+
+      // keep list manageable in DOM (still keep state.called full)
+      if(elCalledList.childElementCount > 80){
+        elCalledList.removeChild(elCalledList.lastElementChild);
+      }
+    }
+
+    function endGame(result){
+      state.ended = true;
       state.running = false;
-      overlay.classList.add("show");
-      overlay.querySelector("h2").textContent = msg || "จบเกม!";
-      overlay.querySelector("p").innerHTML =
-        `คะแนนของคุณ: <b>${state.score}</b> <br/>กด เริ่ม/รีสตาร์ท เพื่อเล่นใหม่`;
-      if (state.score > best) {
-        best = state.score;
-        localStorage.setItem(BEST_KEY, String(best));
-        elBest.textContent = best;
+      stopAuto();
+
+      drawBtn.disabled = true;
+      pauseBtn.disabled = true;
+
+      if(result === "player"){
+        setStatus("จบเกม", "คุณได้ Bingo ก่อน!", "WIN", "win");
+      }else if(result === "bot"){
+        setStatus("จบเกม", "บอทได้ Bingo ก่อน!", "LOSE", "lose");
+      }else{
+        setStatus("จบเกม", "ได้ Bingo พร้อมกัน!", "DRAW", "draw");
       }
     }
 
-    // ===== Input =====
-    function setKey(e, down) {
-      const k = e.key.toLowerCase();
-      if (["arrowup","arrowdown","arrowleft","arrowright","w","a","s","d"," "].includes(k)) {
-        e.preventDefault();
+    function drawNumber(){
+      if(state.ended) return;
+      if(state.paused) return;
+
+      if(!state.running){
+        state.running = true;
+        pauseBtn.disabled = false;
+        drawBtn.disabled = false;
+        setStatus("กำลังเล่น", "สุ่มเลขไปเรื่อย ๆ จนกว่าจะมีผู้ชนะ", "");
       }
-      if (down) state.keys.add(k);
-      else state.keys.delete(k);
 
-      if (k === " " && down) state.boost = true;
-      if (k === " " && !down) state.boost = false;
+      if(state.deck.length === 0){
+        // no more numbers, decide by lines
+        const p = countLines(playerCard);
+        const b = countLines(botCard);
+        if(p>b) endGame("player");
+        else if(b>p) endGame("bot");
+        else endGame("draw");
+        return;
+      }
+
+      clearHitEffects();
+
+      const n = state.deck.pop();
+      elLastNum.textContent = n;
+      pushCalled(n);
+
+      // auto mark both
+      const pHits = markIfPresent(playerCard, elPlayer, n);
+      const bHits = markIfPresent(botCard, elBot, n);
+      state.lastMarkedCells = [...pHits, ...bHits];
+
+      // make sure FREE stays marked visually
+      syncMarkedStyles(playerCard, elPlayer);
+      syncMarkedStyles(botCard, elBot);
+
+      // update lines
+      const pLines = countLines(playerCard);
+      const bLines = countLines(botCard);
+      elPLines.textContent = String(pLines);
+      elBLines.textContent = String(bLines);
+
+      // win check: first to reach >=1 line (same draw can be tie)
+      const pWin = pLines >= 1;
+      const bWin = bLines >= 1;
+
+      if(pWin && bWin) endGame("draw");
+      else if(pWin) endGame("player");
+      else if(bWin) endGame("bot");
+
+      // remove hit effect shortly
+      if(state.lastMarkedCells.length){
+        setTimeout(() => clearHitEffects(), 240);
+      }
     }
 
-    window.addEventListener("keydown", e => setKey(e, true), {passive:false});
-    window.addEventListener("keyup", e => setKey(e, false), {passive:false});
-
-    // Touch directional buttons (hold to move)
-    const dirBtns = document.querySelectorAll("[data-dir]");
-    const touchHold = { up:false, down:false, left:false, right:false };
-
-    function touchDir(dir, on){
-      touchHold[dir] = on;
+    function startAuto(){
+      stopAuto();
+      const ms = Number(speedSel.value || 1200);
+      state.autoTimer = setInterval(() => drawNumber(), ms);
+      drawBtn.disabled = true;
+      setStatus("Auto Mode", "ระบบกำลังสุ่มเลขอัตโนมัติ…", "");
     }
-    dirBtns.forEach(btn=>{
-      const dir = btn.dataset.dir;
-      const start = (e)=>{ e.preventDefault(); touchDir(dir, true); };
-      const end   = (e)=>{ e.preventDefault(); touchDir(dir, false); };
-      btn.addEventListener("pointerdown", start);
-      btn.addEventListener("pointerup", end);
-      btn.addEventListener("pointercancel", end);
-      btn.addEventListener("pointerleave", end);
-    });
 
-    // Boost button
-    const boostOn = (e)=>{ e.preventDefault(); state.boost = true; };
-    const boostOff= (e)=>{ e.preventDefault(); state.boost = false; };
-    btnBoost.addEventListener("pointerdown", boostOn);
-    btnBoost.addEventListener("pointerup", boostOff);
-    btnBoost.addEventListener("pointercancel", boostOff);
-    btnBoost.addEventListener("pointerleave", boostOff);
+    function stopAuto(){
+      if(state.autoTimer){
+        clearInterval(state.autoTimer);
+        state.autoTimer = null;
+      }
+      if(!state.ended){
+        drawBtn.disabled = (modeSel.value === "auto");
+      }
+    }
 
-    // ===== Buttons =====
-    btnStart.addEventListener("click", () => resetGame());
-    btnPlay.addEventListener("click", () => resetGame());
-    btnPause.addEventListener("click", () => {
-      if (!state.running && !state.over) return;
+    function resetGame(){
+      // clear timers
+      stopAuto();
+
+      state.called = [];
+      state.calledSet = new Set();
+      state.deck = makeDeck();
+      state.running = false;
+      state.paused = false;
+      state.ended = false;
+      state.lastMarkedCells = [];
+
+      playerCard = makeCard();
+      botCard = makeCard();
+
+      // render
+      renderCard(elPlayer, playerCard, "player");
+      renderCard(elBot, botCard, "bot");
+
+      // ui
+      elLastNum.textContent = "—";
+      elCalledCount.textContent = "0";
+      elCalledList.innerHTML = "";
+      elPLines.textContent = "0";
+      elBLines.textContent = "0";
+
+      drawBtn.disabled = (modeSel.value === "auto");
+      pauseBtn.disabled = true;
+      pauseBtn.textContent = "พัก";
+      pauseBtn.setAttribute("aria-pressed", "false");
+
+      setStatus("พร้อมเล่น", "กด “สุ่มเลข” เพื่อเริ่ม หรือเลือก Auto", "");
+
+      // keep FREE marked visually
+      syncMarkedStyles(playerCard, elPlayer);
+      syncMarkedStyles(botCard, elBot);
+    }
+
+    // ======= Controls =======
+    drawBtn.addEventListener("click", drawNumber);
+
+    resetBtn.addEventListener("click", resetGame);
+
+    pauseBtn.addEventListener("click", () => {
+      if(state.ended) return;
+      if(!state.running) return;
+
       state.paused = !state.paused;
-      btnPause.setAttribute("aria-pressed", String(state.paused));
-      btnPause.textContent = state.paused ? "เล่นต่อ" : "พัก";
-      if (!state.paused) state.lastTs = performance.now();
+      pauseBtn.setAttribute("aria-pressed", String(state.paused));
+      pauseBtn.textContent = state.paused ? "เล่นต่อ" : "พัก";
+
+      if(state.paused){
+        setStatus("พักเกม", "กด “เล่นต่อ” เพื่อไปต่อ", "");
+      }else{
+        setStatus(modeSel.value === "auto" ? "Auto Mode" : "กำลังเล่น",
+                  modeSel.value === "auto" ? "ระบบกำลังสุ่มเลขอัตโนมัติ…" : "สุ่มเลขต่อได้เลย",
+                  "");
+      }
     });
 
-    // ===== Game loop =====
-    function update(dt) {
-      // timer
-      state.time -= dt;
-      if (state.time <= 0) {
-        state.time = 0;
-        elTime.textContent = state.time.toFixed(1);
-        gameOver("หมดเวลา!");
-        return;
-      }
-      elTime.textContent = state.time.toFixed(1);
+    modeSel.addEventListener("change", () => {
+      if(state.ended) return;
 
-      // movement
-      const speed = player.speed * (state.boost ? 1.55 : 1.0);
-      let dx = 0, dy = 0;
-
-      // keyboard
-      const k = state.keys;
-      if (k.has("arrowup") || k.has("w")) dy -= 1;
-      if (k.has("arrowdown") || k.has("s")) dy += 1;
-      if (k.has("arrowleft") || k.has("a")) dx -= 1;
-      if (k.has("arrowright") || k.has("d")) dx += 1;
-
-      // touch hold
-      if (touchHold.up) dy -= 1;
-      if (touchHold.down) dy += 1;
-      if (touchHold.left) dx -= 1;
-      if (touchHold.right) dx += 1;
-
-      // normalize
-      if (dx || dy) {
-        const len = Math.hypot(dx, dy);
-        dx /= len; dy /= len;
-        player.x += dx * speed * dt;
-        player.y += dy * speed * dt;
-      }
-
-      // keep inside bounds
-      player.x = clamp(player.x, player.r+10, W - player.r-10);
-      player.y = clamp(player.y, player.r+10, H - player.r-10);
-
-      // enemy bounce
-      enemy.x += enemy.vx * dt;
-      enemy.y += enemy.vy * dt;
-      if (enemy.x < enemy.r+10){ enemy.x = enemy.r+10; enemy.vx *= -1; }
-      if (enemy.x > W-enemy.r-10){ enemy.x = W-enemy.r-10; enemy.vx *= -1; }
-      if (enemy.y < enemy.r+10){ enemy.y = enemy.r+10; enemy.vy *= -1; }
-      if (enemy.y > H-enemy.r-10){ enemy.y = H-enemy.r-10; enemy.vy *= -1; }
-
-      // coin collect
-      const hitCoin = dist2(player.x, player.y, coin.x, coin.y) <= (player.r + coin.r + 4) ** 2;
-      if (hitCoin) {
-        state.score += 1;
-        elScore.textContent = state.score;
-
-        // add a little time as reward
-        state.time = Math.min(40, state.time + 1.2);
-        respawnCoin();
-
-        // enemy gets a bit faster every few points
-        const mult = 1 + Math.floor(state.score / 5) * 0.08;
-        const cap = 420;
-        enemy.vx = clamp(enemy.vx * mult, -cap, cap);
-        enemy.vy = clamp(enemy.vy * mult, -cap, cap);
-      }
-
-      // enemy collision
-      const hitEnemy = dist2(player.x, player.y, enemy.x, enemy.y) <= (player.r + enemy.r + 2) ** 2;
-      if (hitEnemy) {
-        gameOver("โดนศัตรูชน!");
-        return;
-      }
-    }
-
-    function draw() {
-      ctx.clearRect(0,0,W,H);
-
-      // grid-ish dots
-      ctx.globalAlpha = 0.12;
-      ctx.fillStyle = "#ffffff";
-      for (let y=20; y<H; y+=40){
-        for (let x=20; x<W; x+=40){
-          ctx.beginPath();
-          ctx.arc(x, y, 1.2, 0, Math.PI*2);
-          ctx.fill();
+      if(modeSel.value === "auto"){
+        // if already playing, start auto; if not, start when auto enabled
+        drawBtn.disabled = true;
+        if(!state.paused){
+          startAuto();
+        }
+      }else{
+        // manual
+        stopAuto();
+        drawBtn.disabled = false;
+        if(state.running && !state.paused){
+          setStatus("กำลังเล่น", "กด “สุ่มเลข” เพื่อเรียกเลขถัดไป", "");
+        }else if(!state.running){
+          setStatus("พร้อมเล่น", "กด “สุ่มเลข” เพื่อเริ่ม", "");
         }
       }
-      ctx.globalAlpha = 1;
+    });
 
-      // arena border
-      ctx.strokeStyle = "rgba(255,255,255,.16)";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(10, 10, W-20, H-20);
-
-      // coin
-      drawGlowCircle(coin.x, coin.y, coin.r, "rgba(110,231,255,.9)", "rgba(110,231,255,.22)");
-      // enemy
-      drawX(enemy.x, enemy.y, enemy.r, "rgba(255,107,139,.95)");
-      // player
-      drawPlayer(player.x, player.y, player.r);
-
-      // UI text inside canvas
-      ctx.fillStyle = "rgba(255,255,255,.78)";
-      ctx.font = "700 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans Thai, sans-serif";
-      ctx.fillText("เก็บ ● หนี ✕", 24, 40);
-
-      if (state.paused && state.running) {
-        ctx.fillStyle = "rgba(0,0,0,.35)";
-        ctx.fillRect(10,10,W-20,H-20);
-        ctx.fillStyle = "rgba(255,255,255,.92)";
-        ctx.font = "800 34px ui-sans-serif, system-ui";
-        ctx.textAlign = "center";
-        ctx.fillText("พักเกม", W/2, H/2 - 8);
-        ctx.font = "600 16px ui-sans-serif, system-ui";
-        ctx.fillStyle = "rgba(255,255,255,.78)";
-        ctx.fillText("กดปุ่ม 'เล่นต่อ' เพื่อกลับมา", W/2, H/2 + 22);
-        ctx.textAlign = "left";
+    speedSel.addEventListener("change", () => {
+      if(modeSel.value === "auto" && !state.ended && !state.paused){
+        startAuto();
       }
-    }
+    });
 
-    function drawGlowCircle(x,y,r,fill,glow){
-      ctx.save();
-      ctx.shadowColor = glow;
-      ctx.shadowBlur = 18;
-      ctx.fillStyle = fill;
-      ctx.beginPath();
-      ctx.arc(x,y,r,0,Math.PI*2);
-      ctx.fill();
-      ctx.restore();
+    // Keyboard shortcuts: Space = draw (manual), R = reset, P = pause
+    window.addEventListener("keydown", (e) => {
+      const k = e.key.toLowerCase();
+      if(k === " "){
+        if(modeSel.value === "manual" && !drawBtn.disabled) { e.preventDefault(); drawNumber(); }
+      }
+      if(k === "r") resetGame();
+      if(k === "p") pauseBtn.click();
+    }, {passive:false});
 
-      // small highlight
-      ctx.globalAlpha = 0.5;
-      ctx.fillStyle = "#ffffff";
-      ctx.beginPath();
-      ctx.arc(x - r*0.25, y - r*0.25, Math.max(2, r*0.28), 0, Math.PI*2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-
-    function drawX(x,y,r,color){
-      ctx.save();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 5;
-      ctx.lineCap = "round";
-      ctx.shadowColor = "rgba(255,107,139,.28)";
-      ctx.shadowBlur = 18;
-      ctx.beginPath();
-      ctx.moveTo(x-r, y-r);
-      ctx.lineTo(x+r, y+r);
-      ctx.moveTo(x+r, y-r);
-      ctx.lineTo(x-r, y+r);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    function drawPlayer(x,y,r){
-      ctx.save();
-      // body
-      ctx.shadowColor = "rgba(255,255,255,.10)";
-      ctx.shadowBlur = 18;
-      ctx.fillStyle = "rgba(255,255,255,.90)";
-      ctx.beginPath();
-      ctx.arc(x,y,r,0,Math.PI*2);
-      ctx.fill();
-
-      // outline
-      ctx.strokeStyle = "rgba(255,255,255,.22)";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // face
-      ctx.fillStyle = "rgba(0,0,0,.55)";
-      ctx.beginPath(); ctx.arc(x - r*0.28, y - r*0.12, 2.4, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x + r*0.28, y - r*0.12, 2.4, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x, y + r*0.18, 3.2, 0, Math.PI*2); ctx.fill();
-
-      ctx.restore();
-    }
-
-    function loop(ts){
-      if (!state.running) { draw(); requestAnimationFrame(loop); return; }
-      if (state.paused)   { draw(); requestAnimationFrame(loop); return; }
-
-      const dt = clamp((ts - state.lastTs) / 1000, 0, 0.05);
-      state.lastTs = ts;
-
-      update(dt);
-      draw();
-
-      requestAnimationFrame(loop);
-    }
-    requestAnimationFrame(loop);
-
-    // Start with overlay shown
-    overlay.classList.add("show");
+    // init
+    resetGame();
   </script>
 </body>
 </html>
