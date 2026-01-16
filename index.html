@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>โย่ว</title>
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#0a2a4a;
+      --card: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.18);
+      --glow: rgba(120,180,255,.55);
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", sans-serif;
+      color:#fff;
+      background:
+        radial-gradient(900px 600px at 20% 20%, rgba(110,160,255,.35), transparent 60%),
+        radial-gradient(700px 500px at 80% 30%, rgba(180,120,255,.28), transparent 60%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      overflow:hidden;
+    }
+
+    /* floating blobs */
+    .blob{
+      position:absolute;
+      width:360px; height:360px;
+      border-radius: 999px;
+      filter: blur(40px);
+      opacity:.35;
+      animation: float 10s ease-in-out infinite;
+      pointer-events:none;
+    }
+    .blob.b1{ background:#7ab6ff; top:-120px; left:-120px; }
+    .blob.b2{ background:#c88bff; bottom:-160px; right:-160px; animation-delay: -3s; }
+    @keyframes float{
+      0%,100%{ transform: translate(0,0) scale(1); }
+      50%{ transform: translate(30px, -25px) scale(1.06); }
+    }
+
+    .card{
+      position:relative;
+      padding: 42px 44px;
+      border-radius: 22px;
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      box-shadow:
+        0 20px 60px rgba(0,0,0,.45),
+        0 0 40px rgba(120,180,255,.12);
+      backdrop-filter: blur(10px);
+      text-align:center;
+      transform: translateZ(0);
+    }
+
+    .title{
+      font-size: clamp(56px, 8vw, 110px);
+      line-height: 1;
+      margin: 0 0 10px;
+      letter-spacing: .02em;
+      text-shadow:
+        0 0 14px rgba(120,180,255,.35),
+        0 18px 40px rgba(0,0,0,.55);
+      animation: pop 900ms cubic-bezier(.2,.9,.2,1) both;
+    }
+
+    .subtitle{
+      margin: 0;
+      opacity:.86;
+      font-size: 16px;
+    }
+
+    .badge{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      margin-top: 18px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+      font-size: 14px;
+      user-select:none;
+    }
+
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background: radial-gradient(circle at 30% 30%, #fff, #7ab6ff);
+      box-shadow: 0 0 16px var(--glow);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pop{
+      from{ transform: translateY(18px) scale(.96); opacity:0; }
+      to{ transform: translateY(0) scale(1); opacity:1; }
+    }
+    @keyframes pulse{
+      0%,100%{ transform: scale(1); opacity:.9; }
+      50%{ transform: scale(1.35); opacity:1; }
+    }
+
+    /* subtle shine */
+    .shine{
+      position:absolute;
+      inset:-2px;
+      border-radius: 22px;
+      background: linear-gradient(110deg,
+        transparent 0%,
+        rgba(255,255,255,.10) 30%,
+        transparent 60%);
+      transform: translateX(-120%);
+      animation: shine 3.4s ease-in-out infinite;
+      pointer-events:none;
+      mix-blend-mode: screen;
+    }
+    @keyframes shine{
+      0%,55%{ transform: translateX(-120%); }
+      75%{ transform: translateX(120%); }
+      100%{ transform: translateX(120%); }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+
+  <main class="card" role="main" aria-label="Yo">
+    <div class="shine"></div>
+    <h1 class="title">โย่ว</h1>
+    <p class="subtitle">สวัสดี 👋 นี่คือหน้า HTML แบบตกแต่ง</p>
+
+    <div class="badge">
+      <span class="dot" aria-hidden="true"></span>
+      <span>พร้อมใช้งาน • HTML + CSS</span>
+    </div>
+  </main>
+</body>
+</html>
