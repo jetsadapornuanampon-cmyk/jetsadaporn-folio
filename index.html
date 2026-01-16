@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>XO vs Bot (ไฟล์เดียว)</title>
+  <title>หมากฮอส vs บอท (ไฟล์เดียว)</title>
   <style>
     :root{
       --bg1:#0b1020; --bg2:#0a2a4a;
@@ -11,9 +11,19 @@
       --stroke: rgba(255,255,255,.16);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.72);
-      --good:#a6ff9a; --warn:#ffd56a; --bad:#ff6b8b; --info:#6ee7ff;
       --shadow: 0 18px 50px rgba(0,0,0,.35);
+
+      --light: rgba(255,255,255,.06);
+      --dark: rgba(0,0,0,.18);
+      --darkBorder: rgba(255,255,255,.14);
+
+      --red: #ff6b8b;
+      --black: #1b1f2a;
+      --cyan: #6ee7ff;
+      --lime: #a6ff9a;
+      --warn: #ffd56a;
     }
+
     *{ box-sizing:border-box; }
     body{
       margin:0; min-height:100vh; display:grid; place-items:center;
@@ -25,11 +35,9 @@
         linear-gradient(135deg, var(--bg1), var(--bg2));
       overflow-x:hidden;
     }
-    .wrap{
-      width:min(980px, 94vw);
-      display:grid;
-      gap:14px;
-    }
+
+    .wrap{ width:min(1100px, 94vw); display:grid; gap:14px; }
+
     .topbar{
       display:flex; gap:12px; align-items:center; justify-content:space-between;
       padding:14px 16px;
@@ -42,6 +50,7 @@
     }
     .title{
       display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      font-weight:1000; letter-spacing:.02em;
     }
     .badge{
       display:inline-flex; gap:8px; align-items:center;
@@ -49,12 +58,11 @@
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.06);
       font-size:13px; color:var(--muted);
-      font-weight:800;
+      font-weight:900;
     }
-    .dot{width:10px;height:10px;border-radius:999px;background:var(--info); box-shadow:0 0 14px rgba(110,231,255,.45)}
-    .actions{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-    }
+    .dot{ width:10px;height:10px;border-radius:999px;background:var(--cyan); box-shadow:0 0 14px rgba(110,231,255,.45) }
+
+    .actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
     button, select{
       appearance:none;
       border:1px solid rgba(255,255,255,.18);
@@ -62,23 +70,21 @@
       color:var(--text);
       padding:10px 12px;
       border-radius:14px;
-      font-weight:900;
+      font-weight:1000;
       cursor:pointer;
       transition: transform .12s ease, background .12s ease, border-color .12s ease;
     }
-    select{ font-weight:900; }
-    button:hover, select:hover{ transform: translateY(-1px); background:rgba(255,255,255,.11); border-color:rgba(255,255,255,.26)}
-    button:active{ transform: translateY(0px) scale(.99)}
-    button:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+    button:hover, select:hover{ transform: translateY(-1px); background:rgba(255,255,255,.11); border-color:rgba(255,255,255,.26) }
+    button:active{ transform: translateY(0px) scale(.99) }
+    button:disabled{ opacity:.55; cursor:not-allowed; transform:none; }
 
     .grid{
       display:grid;
-      grid-template-columns: 1fr .9fr;
+      grid-template-columns: 1.15fr .85fr;
       gap:14px;
     }
-    @media (max-width: 920px){
-      .grid{ grid-template-columns: 1fr; }
-    }
+    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
+
     .panel{
       border:1px solid var(--stroke);
       background:var(--card);
@@ -88,84 +94,102 @@
       padding:14px;
     }
 
-    .statusRow{
-      display:flex; gap:10px; align-items:center; justify-content:space-between;
-      flex-wrap:wrap;
-      margin-bottom:12px;
-    }
     .status{
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
       padding:12px 14px;
       border-radius:16px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.12);
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      flex:1;
-      min-width: 240px;
+      margin-bottom:12px;
+      flex-wrap:wrap;
     }
-    .status .label{ color:var(--muted); font-weight:900; font-size:12px; }
-    .status .value{ font-weight:1000; font-size:16px; }
-    .pillRow{
-      display:flex; gap:10px; flex-wrap:wrap;
-    }
+    .status .left .label{ color:var(--muted); font-size:12px; font-weight:1000; }
+    .status .left .value{ font-size:16px; font-weight:1100; }
+    .pills{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .pill{
       display:inline-flex; gap:8px; align-items:center;
       padding:8px 10px; border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.06);
       font-size:13px; color:var(--muted);
-      font-weight:900;
+      font-weight:1000;
     }
     .pill b{ color:var(--text); }
+    .swatch{ width:10px;height:10px;border-radius:999px; }
+    .swatch.red{ background: var(--red); box-shadow:0 0 14px rgba(255,107,139,.35) }
+    .swatch.black{ background: #1f2432; box-shadow:0 0 14px rgba(0,0,0,.25) }
+    .swatch.king{ background: var(--warn); box-shadow:0 0 14px rgba(255,213,106,.28) }
 
     .board{
       width:100%;
+      aspect-ratio: 1 / 1;
       display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:12px;
+      grid-template-columns: repeat(8, 1fr);
+      gap:10px;
       padding:12px;
       border-radius:18px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.12);
-      position:relative;
       user-select:none;
       -webkit-user-select:none;
     }
-    .cell{
-      aspect-ratio: 1 / 1;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.06);
+
+    .sq{
+      position:relative;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
       display:grid;
       place-items:center;
-      font-weight:1100;
-      font-size: clamp(36px, 6vw, 64px);
-      cursor:pointer;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
-      position:relative;
       overflow:hidden;
     }
-    .cell:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.25); }
-    .cell:active{ transform: translateY(0px) scale(.99); }
-    .cell.disabled{ cursor:not-allowed; opacity:.85; }
-    .cell.win{
-      border-color: rgba(166,255,154,.35);
-      background: rgba(166,255,154,.14);
-      box-shadow: 0 0 0 1px rgba(166,255,154,.10) inset;
+    .sq.light{ background: var(--light); }
+    .sq.dark{ background: var(--dark); border-color: var(--darkBorder); }
+
+    .sq.select{
+      outline: 2px solid rgba(110,231,255,.55);
+      box-shadow: 0 0 0 2px rgba(110,231,255,.10) inset;
+    }
+    .sq.move{
+      outline: 2px solid rgba(166,255,154,.55);
+      box-shadow: 0 0 0 2px rgba(166,255,154,.12) inset;
+    }
+    .sq.capture{
+      outline: 2px solid rgba(255,213,106,.55);
+      box-shadow: 0 0 0 2px rgba(255,213,106,.12) inset;
     }
 
-    .markX{ color: rgba(110,231,255,.95); text-shadow: 0 0 14px rgba(110,231,255,.25); }
-    .markO{ color: rgba(255,213,106,.95); text-shadow: 0 0 14px rgba(255,213,106,.22); }
-
-    .sideTitle{
-      display:flex; align-items:center; justify-content:space-between;
-      margin-bottom:10px;
-      gap:10px;
+    .piece{
+      width:78%;
+      height:78%;
+      border-radius:999px;
+      position:relative;
+      display:grid;
+      place-items:center;
+      box-shadow: 0 10px 26px rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.12);
+      transform: translateZ(0);
     }
-    .sideTitle h3{ margin:0; font-size:16px; font-weight:1100; letter-spacing:.02em; }
+    .piece.red{ background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.35), rgba(255,255,255,0) 45%), var(--red); }
+    .piece.black{ background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.18), rgba(255,255,255,0) 45%), #23293a; }
+
+    .crown{
+      width:52%;
+      height:52%;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,213,106,.18);
+      box-shadow: 0 0 18px rgba(255,213,106,.18);
+      font-weight:1200;
+      font-size: 16px;
+      color: rgba(255,255,255,.92);
+    }
+
     .hint{
-      margin: 8px 2px 0;
-      font-size: 13px;
-      color: var(--muted);
+      margin:10px 2px 0;
+      font-size:13px;
+      color:var(--muted);
       line-height:1.45;
     }
     .kbd{
@@ -176,338 +200,592 @@
       font-weight:1000;
       font-size:12px;
     }
-    .scoreBig{
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap:10px;
-    }
-    .scoreBox{
-      padding:12px 12px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.12);
-    }
-    .scoreBox .t{ color:var(--muted); font-weight:1000; font-size:12px; margin-bottom:6px; }
-    .scoreBox .n{ font-weight:1200; font-size:22px; }
-    .tagWin{ color: var(--good); font-weight:1200; }
-    .tagLose{ color: var(--bad); font-weight:1200; }
-    .tagDraw{ color: var(--warn); font-weight:1200; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="topbar">
       <div class="title">
-        <div style="font-weight:1200; font-size:18px;">XO vs Bot</div>
-        <span class="badge"><span class="dot"></span> เล่นเป็น X • บอทเป็น O</span>
-        <span class="badge">Hard = บอทแทบไม่แพ้</span>
+        <div>หมากฮอส vs บอท</div>
+        <span class="badge"><span class="dot"></span> คุณ=แดง (เริ่มก่อน) • บอท=ดำ</span>
+        <span class="badge">ถ้ามีกิน ต้องกิน • กินต่อเนื่องได้</span>
       </div>
       <div class="actions">
-        <select id="difficulty" title="ความยาก">
-          <option value="easy">Easy</option>
-          <option value="normal" selected>Normal</option>
-          <option value="hard">Hard (Minimax)</option>
+        <select id="diff" title="ความยากบอท">
+          <option value="1">Easy</option>
+          <option value="2" selected>Normal</option>
+          <option value="3">Hard</option>
         </select>
         <button id="newBtn">ตาใหม่</button>
-        <button id="resetBtn">รีเซ็ตสกอร์</button>
+        <button id="resetBtn">รีเซ็ตเกม</button>
       </div>
     </div>
 
     <div class="grid">
       <div class="panel">
-        <div class="statusRow">
-          <div class="status">
-            <div>
-              <div class="label">สถานะเกม</div>
-              <div class="value" id="statusText">ตาคุณ (X)</div>
-            </div>
-            <div class="pillRow">
-              <span class="pill">X: <b>คุณ</b></span>
-              <span class="pill">O: <b>บอท</b></span>
-            </div>
+        <div class="status">
+          <div class="left">
+            <div class="label">สถานะ</div>
+            <div class="value" id="statusText">ตาคุณ (แดง)</div>
+          </div>
+          <div class="pills">
+            <span class="pill"><span class="swatch red"></span> แดง: <b id="redCount">12</b></span>
+            <span class="pill"><span class="swatch black"></span> ดำ: <b id="blackCount">12</b></span>
+            <span class="pill"><span class="swatch king"></span> คิง: <b id="kingCount">0</b></span>
           </div>
         </div>
 
-        <div class="board" id="board" aria-label="กระดาน XO">
-          <!-- cells inserted by JS -->
-        </div>
+        <div class="board" id="board" aria-label="กระดานหมากฮอส"></div>
 
         <p class="hint">
-          วิธีเล่น: คลิกช่องเพื่อวาง <span class="kbd">X</span> แล้วบอทจะวาง <span class="kbd">O</span> อัตโนมัติ <br>
-          ทิป: โหมด <b>Hard</b> จะใช้ Minimax (ยากสุด)
+          วิธีเล่น: คลิกหมาก “แดง” แล้วคลิกช่องปลายทาง <br>
+          ปุ่มลัด: <span class="kbd">N</span> ตาใหม่ • <span class="kbd">R</span> รีเซ็ต <br>
+          ทิป: ช่องที่ “กินได้” จะไฮไลต์สีเหลือง
         </p>
       </div>
 
       <div class="panel">
-        <div class="sideTitle">
-          <h3>สกอร์</h3>
-          <div class="hint" style="margin:0;">ชนะ/แพ้/เสมอ</div>
-        </div>
-
-        <div class="scoreBig">
-          <div class="scoreBox">
-            <div class="t">คุณ (X)</div>
-            <div class="n" id="sx">0</div>
-          </div>
-          <div class="scoreBox">
-            <div class="t">เสมอ</div>
-            <div class="n" id="sd">0</div>
-          </div>
-          <div class="scoreBox">
-            <div class="t">บอท (O)</div>
-            <div class="n" id="so">0</div>
-          </div>
-        </div>
-
-        <div class="scoreBox" style="margin-top:10px;">
-          <div class="t">ผลล่าสุด</div>
-          <div class="n" id="lastResult" style="font-size:16px;">—</div>
-        </div>
-
-        <p class="hint">
-          ปุ่มลัด: <span class="kbd">N</span> ตาใหม่ • <span class="kbd">R</span> รีเซ็ตสกอร์
+        <div style="font-weight:1100; margin-bottom:10px;">กติกาในเกมนี้</div>
+        <p class="hint" style="margin-top:0;">
+          • เดินทแยง 1 ช่อง (แดงเดินขึ้น / ดำเดินลง) <br>
+          • กินโดย “กระโดด” ข้ามศัตรู 1 ตัว ไปลงช่องว่างถัดไป <br>
+          • ถ้ากินได้ ต้องกิน และถ้ากินต่อได้ ต้องกินต่อจนจบ <br>
+          • ถึงแถวสุดท้ายจะเป็น “คิง” (เดิน/กินได้ทั้งขึ้นและลง)
         </p>
+        <div style="height:10px;"></div>
+        <div class="hint">
+          ถ้าอยากให้เป็น “กติกาหมากฮอสไทย” แบบละเอียดมากขึ้น (เช่น บังคับทางกินยาวสุด ฯลฯ) บอกได้ เดี๋ยวผมปรับกติกาให้ตรงเลย
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    // ===== XO vs Bot (single-file) =====
+    // =========================
+    // Checkers (หมากฮอส) vs Bot
+    // Board: 8x8, only dark squares are used.
+    // Pieces:
+    //   0 empty
+    //   1 red man, 2 red king
+    //  -1 black man, -2 black king
+    // Red moves "up" (row decreases). Black moves "down" (row increases).
+    // Must-capture rule enabled. Multi-jump enabled.
+    // Bot uses minimax + alpha-beta (small depth, selectable).
+    // =========================
+
     const boardEl = document.getElementById("board");
     const statusText = document.getElementById("statusText");
-    const difficultyEl = document.getElementById("difficulty");
+    const redCountEl = document.getElementById("redCount");
+    const blackCountEl = document.getElementById("blackCount");
+    const kingCountEl = document.getElementById("kingCount");
+    const diffEl = document.getElementById("diff");
     const newBtn = document.getElementById("newBtn");
     const resetBtn = document.getElementById("resetBtn");
 
-    const sx = document.getElementById("sx");
-    const so = document.getElementById("so");
-    const sd = document.getElementById("sd");
-    const lastResult = document.getElementById("lastResult");
+    const SIZE = 8;
+    const RED = 1, REDK = 2, BLK = -1, BLKK = -2;
 
-    const SCORE_KEY = "xo_vs_bot_score_v1";
-    const loadScore = () => {
-      try{
-        const v = JSON.parse(localStorage.getItem(SCORE_KEY) || "null");
-        if(!v) return {x:0,o:0,d:0};
-        return {x:+v.x||0, o:+v.o||0, d:+v.d||0};
-      }catch{ return {x:0,o:0,d:0}; }
-    };
-    const saveScore = (s) => localStorage.setItem(SCORE_KEY, JSON.stringify(s));
+    let board, turn, locked, ended;
 
-    let score = loadScore();
-    function syncScore(){
-      sx.textContent = score.x;
-      so.textContent = score.o;
-      sd.textContent = score.d;
-    }
-    syncScore();
+    // Selection state (player)
+    let selected = null; // {r,c}
+    let legalMoves = []; // moves for current selected
+    let forcedChain = null; // {r,c} if player must continue capture with this piece
 
-    let board = Array(9).fill(null); // "X" | "O" | null
-    let turn = "X"; // player starts
-    let locked = false;
-    let gameOver = false;
+    function inBounds(r,c){ return r>=0 && r<SIZE && c>=0 && c<SIZE; }
+    function isDark(r,c){ return (r+c)%2===1; }
+    function sideOf(v){ return v>0 ? 1 : (v<0 ? -1 : 0); }
+    function isKing(v){ return Math.abs(v)===2; }
 
-    const wins = [
-      [0,1,2],[3,4,5],[6,7,8],
-      [0,3,6],[1,4,7],[2,5,8],
-      [0,4,8],[2,4,6]
-    ];
+    function cloneBoard(b){ return b.map(row => row.slice()); }
 
-    function getWinner(b){
-      for(const line of wins){
-        const [a,c,d] = line;
-        if(b[a] && b[a] === b[c] && b[a] === b[d]) return {winner:b[a], line};
+    function initBoard(){
+      const b = Array.from({length:SIZE},()=>Array(SIZE).fill(0));
+      // black on top 3 rows (dark squares)
+      for(let r=0;r<3;r++){
+        for(let c=0;c<SIZE;c++){
+          if(isDark(r,c)) b[r][c] = BLK;
+        }
       }
-      if(b.every(x => x)) return {winner:"D", line:[]}; // draw
+      // red on bottom 3 rows
+      for(let r=SIZE-3;r<SIZE;r++){
+        for(let c=0;c<SIZE;c++){
+          if(isDark(r,c)) b[r][c] = RED;
+        }
+      }
+      return b;
+    }
+
+    function countPieces(b){
+      let red=0, black=0, kings=0;
+      for(let r=0;r<SIZE;r++){
+        for(let c=0;c<SIZE;c++){
+          const v=b[r][c];
+          if(v===0) continue;
+          if(v>0) red++; else black++;
+          if(isKing(v)) kings++;
+        }
+      }
+      return {red, black, kings};
+    }
+
+    function setStatus(t){ statusText.textContent = t; }
+
+    // ---------- Move generation ----------
+    // A move object:
+    // { from:[r,c], path:[[r1,c1],[r2,c2],...], captures:[[cr,cc],...], isCapture:true/false }
+    // path contains landing squares in sequence (for multi-jump, multiple entries)
+    function directionsFor(v){
+      const s = sideOf(v);
+      const king = isKing(v);
+      if(king) return [[-1,-1],[-1,1],[1,-1],[1,1]];
+      return (s===1) ? [[-1,-1],[-1,1]] : [[1,-1],[1,1]];
+    }
+
+    function getSimpleMoves(b, r, c){
+      const v=b[r][c];
+      if(v===0) return [];
+      const dirs = directionsFor(v);
+      const moves=[];
+      for(const [dr,dc] of dirs){
+        const nr=r+dr, nc=c+dc;
+        if(inBounds(nr,nc) && b[nr][nc]===0){
+          moves.push({from:[r,c], path:[[nr,nc]], captures:[], isCapture:false});
+        }
+      }
+      return moves;
+    }
+
+    function getCaptureMovesFrom(b, r, c){
+      const v=b[r][c];
+      if(v===0) return [];
+      const s = sideOf(v);
+      const dirs = directionsFor(v);
+      const results=[];
+
+      // DFS for multi-jump
+      function dfs(boardNow, cr, cc, path, caps){
+        let extended=false;
+        const vv = boardNow[cr][cc];
+        const dirs2 = directionsFor(vv); // if kinging mid-chain? in most rules kinging occurs after chain ends; we'll keep directions by original piece state
+        // We'll keep it by vv as it remains same until promotion after move ends.
+        for(const [dr,dc] of dirs2){
+          const mr=cr+dr, mc=cc+dc;
+          const lr=cr+2*dr, lc=cc+2*dc;
+          if(!inBounds(lr,lc) || !inBounds(mr,mc)) continue;
+          const mid = boardNow[mr][mc];
+          if(mid!==0 && sideOf(mid)===-s && boardNow[lr][lc]===0){
+            // capture
+            extended=true;
+            const nb = cloneBoard(boardNow);
+            nb[lr][lc]=nb[cr][cc];
+            nb[cr][cc]=0;
+            nb[mr][mc]=0;
+            dfs(nb, lr, lc, path.concat([[lr,lc]]), caps.concat([[mr,mc]]));
+          }
+        }
+        if(!extended && caps.length>0){
+          results.push({from:[r,c], path, captures:caps, isCapture:true});
+        }
+      }
+
+      // start exploring
+      dfs(b, r, c, [], []);
+      return results;
+    }
+
+    function getAllMoves(b, side, onlyFrom=null){
+      // side: 1 red, -1 black
+      let captures=[];
+      let simples=[];
+
+      for(let r=0;r<SIZE;r++){
+        for(let c=0;c<SIZE;c++){
+          if(!isDark(r,c)) continue;
+          const v=b[r][c];
+          if(sideOf(v)!==side) continue;
+          if(onlyFrom && (onlyFrom[0]!==r || onlyFrom[1]!==c)) continue;
+
+          const caps = getCaptureMovesFrom(b,r,c);
+          if(caps.length) captures = captures.concat(caps);
+          else simples = simples.concat(getSimpleMoves(b,r,c));
+        }
+      }
+      return captures.length ? captures : simples;
+    }
+
+    function applyMove(b, move){
+      const nb = cloneBoard(b);
+      const [sr,sc]=move.from;
+      const piece = nb[sr][sc];
+      nb[sr][sc]=0;
+      // landing is last in path; if path empty (shouldn't), ignore
+      const last = move.path[move.path.length-1];
+      nb[last[0]][last[1]] = piece;
+
+      // remove captures
+      for(const [cr,cc] of move.captures){
+        nb[cr][cc]=0;
+      }
+
+      // promotion (after full move)
+      const v = nb[last[0]][last[1]];
+      if(v===RED && last[0]===0) nb[last[0]][last[1]]=REDK;
+      if(v===BLK && last[0]===SIZE-1) nb[last[0]][last[1]]=BLKK;
+
+      return nb;
+    }
+
+    // ---------- Bot AI (minimax) ----------
+    function evaluate(b){
+      // positive = good for black (bot), negative = good for red
+      let score=0;
+      let mobB=0, mobR=0;
+
+      for(let r=0;r<SIZE;r++){
+        for(let c=0;c<SIZE;c++){
+          const v=b[r][c];
+          if(v===0) continue;
+          const abs = Math.abs(v);
+          const val = (abs===1) ? 1.0 : 1.55; // king > man
+          if(v<0) score += val;
+          else score -= val;
+
+          // small center preference
+          const center = 3.5;
+          const dist = Math.abs(r-center)+Math.abs(c-center);
+          const centerBonus = (4.5 - dist) * 0.02;
+          if(v<0) score += centerBonus;
+          else score -= centerBonus;
+        }
+      }
+
+      // mobility
+      mobB = getAllMoves(b,-1).length;
+      mobR = getAllMoves(b, 1).length;
+      score += (mobB - mobR) * 0.03;
+
+      return score;
+    }
+
+    function isTerminal(b){
+      const c = countPieces(b);
+      if(c.red===0 || c.black===0) return true;
+      // no moves for a side => loses
+      if(getAllMoves(b,1).length===0) return true;
+      if(getAllMoves(b,-1).length===0) return true;
+      return false;
+    }
+
+    function winnerOf(b){
+      const c=countPieces(b);
+      const redMoves = getAllMoves(b,1).length;
+      const blackMoves = getAllMoves(b,-1).length;
+      if(c.red===0 || redMoves===0) return "black";
+      if(c.black===0 || blackMoves===0) return "red";
       return null;
     }
 
-    function setStatus(msg){
-      statusText.textContent = msg;
+    function minimax(b, depth, alpha, beta, maximizing){
+      if(depth===0 || isTerminal(b)){
+        const w = winnerOf(b);
+        if(w==="black") return {score: 999};
+        if(w==="red") return {score: -999};
+        return {score: evaluate(b)};
+      }
+
+      const side = maximizing ? -1 : 1; // maximizing for black
+      const moves = getAllMoves(b, side);
+      if(moves.length===0){
+        return {score: maximizing ? -999 : 999};
+      }
+
+      let bestMove=null;
+
+      if(maximizing){
+        let best=-Infinity;
+        for(const m of moves){
+          const nb = applyMove(b,m);
+          const res = minimax(nb, depth-1, alpha, beta, false);
+          if(res.score>best){
+            best=res.score; bestMove=m;
+          }
+          alpha = Math.max(alpha, best);
+          if(beta<=alpha) break;
+        }
+        return {score: best, move: bestMove};
+      }else{
+        let best=Infinity;
+        for(const m of moves){
+          const nb = applyMove(b,m);
+          const res = minimax(nb, depth-1, alpha, beta, true);
+          if(res.score<best){
+            best=res.score; bestMove=m;
+          }
+          beta = Math.min(beta, best);
+          if(beta<=alpha) break;
+        }
+        return {score: best, move: bestMove};
+      }
+    }
+
+    function botChooseMove(b){
+      const d = Number(diffEl.value || 2);
+      const depth = (d===1) ? 1 : (d===2 ? 3 : 5);
+      // Easy: sometimes random
+      const moves = getAllMoves(b,-1);
+      if(moves.length===0) return null;
+      if(d===1 && Math.random()<0.45){
+        return moves[(Math.random()*moves.length)|0];
+      }
+      const res = minimax(b, depth, -Infinity, Infinity, true);
+      return res.move || moves[0];
+    }
+
+    // ---------- UI ----------
+    function clearHighlights(){
+      boardEl.querySelectorAll(".sq").forEach(sq=>{
+        sq.classList.remove("select","move","capture");
+      });
     }
 
     function render(){
       boardEl.innerHTML = "";
-      const w = getWinner(board);
-      for(let i=0;i<9;i++){
-        const cell = document.createElement("div");
-        cell.className = "cell";
-        if(gameOver || locked || board[i]) cell.classList.add("disabled");
+      const counts = countPieces(board);
+      redCountEl.textContent = counts.red;
+      blackCountEl.textContent = counts.black;
+      kingCountEl.textContent = counts.kings;
 
-        const v = board[i];
-        if(v === "X"){
-          cell.innerHTML = `<span class="markX">X</span>`;
-        }else if(v === "O"){
-          cell.innerHTML = `<span class="markO">O</span>`;
+      for(let r=0;r<SIZE;r++){
+        for(let c=0;c<SIZE;c++){
+          const sq = document.createElement("div");
+          sq.className = "sq " + (isDark(r,c) ? "dark" : "light");
+          sq.dataset.r = r;
+          sq.dataset.c = c;
+
+          const v = board[r][c];
+          if(v!==0){
+            const piece = document.createElement("div");
+            piece.className = "piece " + (v>0 ? "red" : "black");
+            if(isKing(v)){
+              const crown = document.createElement("div");
+              crown.className = "crown";
+              crown.textContent = "K";
+              piece.appendChild(crown);
+            }
+            sq.appendChild(piece);
+          }
+
+          sq.addEventListener("click", ()=>onSquareClick(r,c));
+          boardEl.appendChild(sq);
+        }
+      }
+
+      // re-apply highlights for selection
+      clearHighlights();
+      if(selected){
+        const sq = getSq(selected.r, selected.c);
+        if(sq) sq.classList.add("select");
+        // highlight legal moves
+        for(const m of legalMoves){
+          const last = m.path[m.path.length-1];
+          const target = getSq(last[0], last[1]);
+          if(target){
+            target.classList.add(m.isCapture ? "capture" : "move");
+          }
+        }
+      }
+    }
+
+    function getSq(r,c){
+      return boardEl.querySelector(`.sq[data-r="${r}"][data-c="${c}"]`);
+    }
+
+    function currentSide(){
+      return turn; // 1 red, -1 black
+    }
+
+    function onSquareClick(r,c){
+      if(ended || locked) return;
+      if(turn !== 1) return; // player is red only
+
+      const v = board[r][c];
+      const side = currentSide();
+
+      // Determine forced capture for player (or forcedChain piece)
+      const mustFrom = forcedChain ? [forcedChain.r, forcedChain.c] : null;
+      const allMoves = getAllMoves(board, side, mustFrom);
+
+      // If clicking a piece of player => select if it has legal moves (respect forcedChain)
+      if(sideOf(v)===side){
+        // if forcedChain, only allow selecting that piece
+        if(forcedChain && (forcedChain.r!==r || forcedChain.c!==c)) return;
+
+        selected = {r,c};
+        legalMoves = allMoves.filter(m => m.from[0]===r && m.from[1]===c);
+
+        // If selected piece has no moves, clear selection
+        if(legalMoves.length===0){
+          selected=null; legalMoves=[];
+        }
+        render();
+        return;
+      }
+
+      // If clicking an empty square and we have a selection, attempt move
+      if(v===0 && selected){
+        const chosen = legalMoves.find(m=>{
+          const last = m.path[m.path.length-1];
+          return last[0]===r && last[1]===c;
+        });
+        if(!chosen) return;
+
+        // Apply move
+        board = applyMove(board, chosen);
+
+        // After capture, check if same piece must continue capturing
+        if(chosen.isCapture){
+          const last = chosen.path[chosen.path.length-1];
+          // find further capture moves from this piece position
+          const contCaps = getAllMoves(board, 1, last).filter(m=>m.isCapture);
+          if(contCaps.length){
+            // force chain
+            forcedChain = {r:last[0], c:last[1]};
+            selected = {r:last[0], c:last[1]};
+            legalMoves = contCaps;
+            setStatus("ต้องกินต่อ (แดง)");
+            render();
+            return;
+          }
+        }
+
+        // End of player's turn
+        forcedChain = null;
+        selected = null;
+        legalMoves = [];
+        render();
+
+        if(checkGameEnd()) return;
+
+        // Bot turn
+        turn = -1;
+        locked = true;
+        setStatus("ตาบอท (ดำ)...");
+        setTimeout(()=>botPlay(), 260);
+      }
+    }
+
+    function checkGameEnd(){
+      const c = countPieces(board);
+      const redMoves = getAllMoves(board, 1).length;
+      const blackMoves = getAllMoves(board, -1).length;
+
+      if(c.red===0 || redMoves===0){
+        ended = true;
+        setStatus("บอทชนะ! (ดำ)");
+        return true;
+      }
+      if(c.black===0 || blackMoves===0){
+        ended = true;
+        setStatus("คุณชนะ! (แดง)");
+        return true;
+      }
+      return false;
+    }
+
+    function botPlay(){
+      if(ended) return;
+
+      // Bot may need multi-capture continuation automatically
+      function doBotTurn(fromPos=null){
+        const moves = getAllMoves(board, -1, fromPos);
+        if(moves.length===0){
+          // no moves -> bot loses
+          ended = true;
+          locked = false;
+          setStatus("คุณชนะ! (แดง)");
+          render();
+          return;
+        }
+
+        // choose move: if continuing chain, just pick best among those
+        let chosen;
+        if(fromPos){
+          // small search just among chain options
+          chosen = moves.length===1 ? moves[0] : botChooseMoveForSubset(moves);
         }else{
-          cell.innerHTML = "";
+          chosen = botChooseMove(board);
+        }
+        if(!chosen) chosen = moves[0];
+
+        board = applyMove(board, chosen);
+        render();
+
+        // If capture and can continue from landing, continue automatically
+        if(chosen.isCapture){
+          const last = chosen.path[chosen.path.length-1];
+          const cont = getAllMoves(board, -1, last).filter(m=>m.isCapture);
+          if(cont.length){
+            // continue chain with same piece
+            setTimeout(()=>doBotTurn(last), 220);
+            return;
+          }
         }
 
-        if(w && w.line.includes(i)){
-          cell.classList.add("win");
-        }
-
-        cell.addEventListener("click", () => onPlayerMove(i));
-        boardEl.appendChild(cell);
-      }
-    }
-
-    function finish(result){
-      gameOver = true;
-      locked = false;
-
-      if(result === "X"){
-        score.x += 1; saveScore(score); syncScore();
-        setStatus("คุณชนะ! (X)");
-        lastResult.innerHTML = `<span class="tagWin">WIN</span> คุณชนะ`;
-      }else if(result === "O"){
-        score.o += 1; saveScore(score); syncScore();
-        setStatus("บอทชนะ! (O)");
-        lastResult.innerHTML = `<span class="tagLose">LOSE</span> บอทชนะ`;
-      }else{
-        score.d += 1; saveScore(score); syncScore();
-        setStatus("เสมอ!");
-        lastResult.innerHTML = `<span class="tagDraw">DRAW</span> เสมอ`;
-      }
-      render();
-    }
-
-    function checkEnd(){
-      const w = getWinner(board);
-      if(!w) return false;
-      if(w.winner === "D") finish("D");
-      else finish(w.winner);
-      return true;
-    }
-
-    function onPlayerMove(i){
-      if(gameOver || locked) return;
-      if(turn !== "X") return;
-      if(board[i]) return;
-
-      board[i] = "X";
-      turn = "O";
-      render();
-
-      if(checkEnd()) return;
-
-      // bot move
-      locked = true;
-      setStatus("ตาบอท (O)...");
-      setTimeout(() => {
-        botMove();
-      }, 220);
-    }
-
-    function availableMoves(b){
-      const m = [];
-      for(let i=0;i<9;i++) if(!b[i]) m.push(i);
-      return m;
-    }
-
-    function botMove(){
-      if(gameOver) return;
-
-      const diff = difficultyEl.value;
-      const moves = availableMoves(board);
-
-      let choice;
-      if(diff === "easy"){
-        // random
-        choice = moves[(Math.random()*moves.length)|0];
-      }else if(diff === "normal"){
-        // 60% smart, 40% random
-        if(Math.random() < 0.60) choice = bestMove(board, "O");
-        else choice = moves[(Math.random()*moves.length)|0];
-      }else{
-        // hard
-        choice = bestMove(board, "O");
+        // bot finishes
+        locked = false;
+        turn = 1;
+        setStatus("ตาคุณ (แดง)");
+        if(checkGameEnd()) return;
       }
 
-      board[choice] = "O";
-      turn = "X";
-      locked = false;
-      render();
-
-      if(checkEnd()) return;
-      setStatus("ตาคุณ (X)");
-    }
-
-    // ===== Minimax (perfect play) =====
-    function bestMove(b, player){
-      let bestScore = -Infinity;
-      let move = null;
-      for(const i of availableMoves(b)){
-        const nb = b.slice();
-        nb[i] = player;
-        const s = minimax(nb, 0, false, player);
-        if(s > bestScore){
-          bestScore = s;
-          move = i;
-        }
-      }
-      return move;
-    }
-
-    // scoring from perspective of bot ("O") by default (player passed)
-    function minimax(b, depth, isMax, botPlayer){
-      const res = getWinner(b);
-      if(res){
-        if(res.winner === "D") return 0;
-        // If botPlayer wins => positive, else negative
-        return (res.winner === botPlayer) ? (10 - depth) : (depth - 10);
-      }
-
-      const bot = botPlayer;
-      const human = (botPlayer === "O") ? "X" : "O";
-
-      if(isMax){
+      // Helper: choose best among given moves using 1-ply eval (fast)
+      function botChooseMoveForSubset(subMoves){
         let best = -Infinity;
-        for(const i of availableMoves(b)){
-          const nb = b.slice();
-          nb[i] = bot;
-          best = Math.max(best, minimax(nb, depth+1, false, botPlayer));
+        let bestMove = subMoves[0];
+        for(const m of subMoves){
+          const nb = applyMove(board, m);
+          const sc = evaluate(nb); // good for black
+          if(sc > best){
+            best = sc;
+            bestMove = m;
+          }
         }
-        return best;
-      }else{
-        let best = Infinity;
-        for(const i of availableMoves(b)){
-          const nb = b.slice();
-          nb[i] = human;
-          best = Math.min(best, minimax(nb, depth+1, true, botPlayer));
-        }
-        return best;
+        return bestMove;
       }
+
+      doBotTurn(null);
     }
 
     function newRound(){
-      board = Array(9).fill(null);
-      turn = "X";
+      // keep current pieces? We'll start fresh round (same as reset game board)
+      board = initBoard();
+      turn = 1; // player red starts
       locked = false;
-      gameOver = false;
-      setStatus("ตาคุณ (X)");
+      ended = false;
+      selected = null;
+      legalMoves = [];
+      forcedChain = null;
+      setStatus("ตาคุณ (แดง)");
       render();
     }
 
-    function resetScore(){
-      score = {x:0,o:0,d:0};
-      saveScore(score);
-      syncScore();
-      lastResult.textContent = "—";
+    function resetGame(){
+      newRound();
     }
 
-    // keyboard shortcuts
-    window.addEventListener("keydown", (e) => {
+    // Keyboard shortcuts
+    window.addEventListener("keydown", (e)=>{
       const k = e.key.toLowerCase();
-      if(k === "n") newRound();
-      if(k === "r") resetScore();
+      if(k==="n") newRound();
+      if(k==="r") resetGame();
     });
 
     newBtn.addEventListener("click", newRound);
-    resetBtn.addEventListener("click", resetScore);
+    resetBtn.addEventListener("click", resetGame);
 
-    // start
-    newRound();
+    // Start
+    resetGame();
   </script>
 </body>
 </html>
