@@ -1,0 +1,99 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Test_Port Slide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="deck" aria-label="Presentation deck">
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="eyebrow">Quarterly Briefing</div>
+        <h1>Present your story like a slide deck, built for the web.</h1>
+        <p>Full-screen sections, bold typography, and a calm visual rhythm make it easy to walk stakeholders through ideas, insights, and outcomes.</p>
+        <div class="tagline">Scroll to explore the narrative</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="eyebrow">Executive Summary</div>
+        <h1>Clarity first. Fewer words, stronger focus.</h1>
+        <div class="accent-line"></div>
+        <p>Each slide keeps the attention on one concept at a time, highlighting the message that matters most in the moment.</p>
+        <div class="grid">
+          <div class="card">
+            <strong>Primary Insight</strong>
+            <span>Surface the key decision point with confidence.</span>
+          </div>
+          <div class="card">
+            <strong>Supporting Data</strong>
+            <span>Short proof points that reinforce your direction.</span>
+          </div>
+          <div class="card">
+            <strong>Next Move</strong>
+            <span>Clear, actionable steps for the team.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="eyebrow">Project Pulse</div>
+        <h1>Track momentum with simple, bold reporting.</h1>
+        <p>Highlight progress, risks, and outcomes in a format that reads like a polished deck.</p>
+        <div class="grid">
+          <div class="card">
+            <strong>Milestones</strong>
+            <span>5 delivered, 2 in flight, 1 queued.</span>
+          </div>
+          <div class="card">
+            <strong>Risks</strong>
+            <span>Vendor delay trending down after mitigation.</span>
+          </div>
+          <div class="card">
+            <strong>Impact</strong>
+            <span>Projected savings of 14 percent this quarter.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="slide-inner">
+        <div class="eyebrow">Close</div>
+        <h1>Ready for the conversation.</h1>
+        <div class="accent-line"></div>
+        <p>Use this structure to deliver presentations, reports, or project overviews that feel intentional and modern.</p>
+        <div class="footer">
+          <span>Prepared for internal review</span>
+          <span>Contact: insights@company.com</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in-view");
+          }
+        });
+      },
+      { threshold: 0.35 }
+    );
+
+    document.querySelectorAll(".slide").forEach((slide) => {
+      observer.observe(slide);
+    });
+  </script>
+</body>
+</html>
